@@ -8,6 +8,7 @@ defmodule Golf.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
 
+    has_many :hosted_games, Golf.Games.Game, foreign_key: :host_id
     timestamps(type: :utc_datetime)
   end
 
