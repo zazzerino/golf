@@ -3,7 +3,7 @@ defmodule Golf.Games.Opts do
   import Ecto.Changeset
 
   schema "opts" do
-    belongs_to :game, Golf.Games.Game
+    belongs_to :game, Golf.Games.Game, type: :string
     field :num_rounds, :integer, default: 1
   end
 
@@ -12,4 +12,6 @@ defmodule Golf.Games.Opts do
     |> cast(attrs, [:num_rounds])
     |> validate_required([:num_rounds])
   end
+
+  def default(), do: %__MODULE__{num_rounds: 1}
 end

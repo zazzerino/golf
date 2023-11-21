@@ -10,9 +10,7 @@ defmodule Golf.GamesFixtures do
   def game_fixture(attrs \\ %{}) do
     {:ok, game} =
       attrs
-      |> Enum.into(%{
-
-      })
+      |> Enum.into(%{})
       |> Golf.Games.create_game()
 
     game

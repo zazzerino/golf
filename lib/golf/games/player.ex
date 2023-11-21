@@ -3,7 +3,7 @@ defmodule Golf.Games.Player do
   import Ecto.Changeset
 
   schema "players" do
-    belongs_to :game, Golf.Games.Game
+    belongs_to :game, Golf.Games.Game, type: :string
     belongs_to :user, Golf.Accounts.User
     field :turn, :integer
     timestamps(type: :utc_datetime)
