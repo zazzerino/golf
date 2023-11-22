@@ -20,15 +20,15 @@ defmodule Golf.GamesDb do
     |> Repo.preload(preloads)
   end
 
-  def insert_game(game) do
-    game
-    |> Game.changeset()
-    |> Repo.insert()
-  end
-
   def create_game(id, users, opts \\ Opts.default()) do
     Games.new_game(id, users, opts)
     |> insert_game()
+  end
+
+  defp insert_game(game) do
+    game
+    |> Game.changeset()
+    |> Repo.insert()
   end
 
   def start_round(game) when length(game.rounds) >= game.opts.num_rounds do

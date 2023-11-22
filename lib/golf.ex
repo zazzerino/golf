@@ -14,4 +14,16 @@ defmodule Golf do
     |> Integer.to_string(36)
     |> String.downcase()
   end
+
+  def subscribe(topic) when is_binary(topic) do
+    Phoenix.PubSub.subscribe(Golf.PubSub, topic)
+  end
+
+  def broadcast(topic, msg) when is_binary(topic) do
+    Phoenix.PubSub.broadcast(Golf.PubSub, topic, msg)
+  end
+
+  def broadcast_from(topic, msg) when is_binary(topic) do
+    Phoenix.PubSub.broadcast_from(Golf.PubSub, self(), topic, msg)
+  end
 end

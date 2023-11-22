@@ -54,6 +54,7 @@ defmodule GolfWeb.Router do
       live "/users/confirm", UserConfirmationInstructionsLive, :new
 
       live "/", HomeLive
+      live "/lobby/:id", LobbyLive
     end
   end
 
