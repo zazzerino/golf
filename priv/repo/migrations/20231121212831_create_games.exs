@@ -41,8 +41,8 @@ defmodule Golf.Repo.Migrations.CreateGames do
       add :round_id, references(:rounds)
       add :player_id, references(:players)
       add :action, :string
-      add :data, :map
-      timestamps(type: :utc_datetime)
+      add :hand_index, :integer
+      timestamps(type: :utc_datetime, updated_at: false)
     end
   end
 end

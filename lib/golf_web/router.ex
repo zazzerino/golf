@@ -55,6 +55,7 @@ defmodule GolfWeb.Router do
 
       live "/", HomeLive
       live "/lobby/:id", LobbyLive
+      live "/game/:id", GameLive
     end
   end
 

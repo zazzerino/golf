@@ -2,7 +2,16 @@ defmodule GolfWeb.Components do
   use Phoenix.Component
   import GolfWeb.CoreComponents
 
-  def users_list(assigns) do
+  def join_lobby_form(assigns) do
+    ~H"""
+    <form phx-submit={@submit} class="space-y-2">
+      <.input name="id" value="" placeholder="Game ID" required />
+      <.button>Join Game</.button>
+    </form>
+    """
+  end
+
+  def players_list(assigns) do
     ~H"""
     <div>
       <h4 class="font-bold text-sm">Players</h4>

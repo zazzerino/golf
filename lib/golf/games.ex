@@ -78,7 +78,7 @@ defmodule Golf.Games do
       List.update_at(
         round.hands,
         event.player.turn,
-        &flip_card_at(&1, event.data.hand_index)
+        &flip_card_at(&1, event.hand_index)
       )
 
     state =
@@ -95,7 +95,7 @@ defmodule Golf.Games do
     hand =
       round.hands
       |> Enum.at(event.player.turn)
-      |> flip_card_at(event.data.hand_index)
+      |> flip_card_at(event.hand_index)
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
@@ -114,7 +114,7 @@ defmodule Golf.Games do
     %{state: state, turn: turn, hands: hands, flipped?: flipped?}
   end
 
-  def round_changes(%Round{state: :take} = round, %Event{action: :take_from_deck} = event) do
+  def round_changes(%Round{state: :take} = round, %Event{action: :take_deck} = event) do
     {:ok, card, deck} = deal_from_deck(round.deck)
 
     %{
@@ -124,7 +124,7 @@ defmodule Golf.Games do
     }
   end
 
-  def round_changes(%Round{state: :take} = round, %Event{action: :take_from_table} = event) do
+  def round_changes(%Round{state: :take} = round, %Event{action: :take_table} = event) do
     [card | table_cards] = round.table_cards
 
     %{
@@ -190,8 +190,8 @@ defmodule Golf.Games do
     {hand, card} =
       round.hands
       |> Enum.at(event.player.turn)
-      |> maybe_flip_all(round.flipped?)
-      |> swap_card(event.data.hand_index, round.held_card["name"])
+      |> flip_all_if(round.flipped?)
+      |> swap_card(event.hand_index, round.held_card["name"])
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
@@ -349,8 +349,8 @@ defmodule Golf.Games do
     Enum.map(hand, &flip_card/1)
   end
 
-  defp maybe_flip_all(hand, true), do: flip_all(hand)
-  defp maybe_flip_all(hand, _), do: hand
+  defp flip_all_if(hand, true), do: flip_all(hand)
+  defp flip_all_if(hand, _), do: hand
 
   defp swap_card(hand, index, new_card) do
     old_card = Enum.at(hand, index)["name"]

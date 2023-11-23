@@ -26,4 +26,9 @@ defmodule Golf do
   def broadcast_from(topic, msg) when is_binary(topic) do
     Phoenix.PubSub.broadcast_from(Golf.PubSub, self(), topic, msg)
   end
+
+  def rotate(list, n) do
+    {left, right} = Enum.split(list, n)
+    right ++ left
+  end
 end

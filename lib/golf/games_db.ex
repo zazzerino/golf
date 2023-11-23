@@ -20,6 +20,11 @@ defmodule Golf.GamesDb do
     |> Repo.preload(preloads)
   end
 
+  def game_exists?(id) do
+    from(g in Game, where: [id: ^id])
+    |> Repo.exists?()
+  end
+
   def create_game(id, users, opts \\ Opts.default()) do
     Games.new_game(id, users, opts)
     |> insert_game()
