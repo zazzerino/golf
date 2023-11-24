@@ -22,6 +22,11 @@ hooks.GameCanvas = {
       gameContext.onGameStart(data.game);
     });
 
+    this.handleEvent("round-started", data => {
+      console.log("round started", data);
+      gameContext.onRoundStart(data.game);
+    });
+
     this.handleEvent("game-event", data => {
       console.log("game event", data);
       gameContext.onGameEvent(data.game, data.event);

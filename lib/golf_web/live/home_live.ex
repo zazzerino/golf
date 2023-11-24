@@ -2,7 +2,8 @@ defmodule GolfWeb.HomeLive do
   use GolfWeb, :live_view
   import GolfWeb.Components, only: [join_lobby_form: 1]
 
-  @id_length 6
+  # we need the id length as a constant in this module so we can use it in guards
+  @id_length Golf.id_length()
 
   @impl true
   def render(assigns) do
@@ -10,7 +11,9 @@ defmodule GolfWeb.HomeLive do
     <div class="space-y-4">
       <h2 class="font-bold">Home</h2>
 
-      <p :if={!@current_user}>Register to create or join game.</p>
+      <p :if={!@current_user}>
+        <.register_link /> or <.login_link /> to play.
+      </p>
 
       <.button :if={@current_user} phx-click="create-lobby">
         Create Game
@@ -18,6 +21,18 @@ defmodule GolfWeb.HomeLive do
 
       <.join_lobby_form :if={@current_user} submit="join-lobby" />
     </div>
+    """
+  end
+
+  defp register_link(assigns) do
+    ~H"""
+    <.link navigate={~p"/users/register"} class="text-blue-500 underline">Register</.link>
+    """
+  end
+
+  defp login_link(assigns) do
+    ~H"""
+    <.link navigate={~p"/users/log_in"} class="text-blue-500 underline">Login</.link>
     """
   end
 

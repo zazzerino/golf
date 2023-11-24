@@ -1,6 +1,8 @@
 defmodule GolfWeb.LobbyLive do
   use GolfWeb, :live_view
-  import GolfWeb.Components, only: [players_list: 1, opts_form: 1]
+  import GolfWeb.Components, only: [players_list: 1, opts_form: 1, chat: 1]
+
+  alias Golf.Chat
   alias Golf.Games.Opts
 
   @impl true
@@ -11,8 +13,17 @@ defmodule GolfWeb.LobbyLive do
         <span class="font-bold">Lobby</span> <%= @id %>
       </h2>
 
-      <.players_list users={@streams.users} />
-      <.opts_form submit="start-game" />
+      <div :if={!@lobby}>Loading...</div>
+
+      <.players_list :if={@lobby} users={@streams.users} />
+
+      <.opts_form :if={@host?} submit="start-game" />
+
+      <p :if={@host? == false} class="text-sm">
+        Waiting for host to start game...
+      </p>
+
+      <.chat :if={@lobby} messages={@streams.chat_messages} submit="submit-chat" />
     </div>
     """
   end
@@ -21,6 +32,7 @@ defmodule GolfWeb.LobbyLive do
   def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
       send(self(), {:load_lobby, id})
+      send(self(), {:load_chat_messages, id})
     end
 
     {:ok,
@@ -28,9 +40,11 @@ defmodule GolfWeb.LobbyLive do
        page_title: "Lobby",
        id: id,
        lobby: nil,
+       host?: nil,
        can_join?: nil
      )
-     |> stream(:users, [])}
+     |> stream(:users, [])
+     |> stream(:chat_messages, [])}
   end
 
   @impl true
@@ -43,12 +57,25 @@ defmodule GolfWeb.LobbyLive do
          |> push_navigate(to: ~p"/")}
 
       lobby ->
+        host? = lobby.host_id == socket.assigns.current_user.id
         :ok = Golf.subscribe("lobby:#{id}")
 
         {:noreply,
-         assign(socket, lobby: lobby)
+         assign(socket, lobby: lobby, host?: host?)
          |> stream(:users, lobby.users)}
     end
+  end
+
+  @impl true
+  def handle_info({:load_chat_messages, id}, socket) do
+    messages = Golf.Chat.get_messages(id)
+    :ok = Golf.subscribe("chat:#{id}")
+    {:noreply, stream(socket, :chat_messages, messages, at: 0)}
+  end
+
+  @impl true
+  def handle_info({:new_chat_message, message}, socket) do
+    {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
   end
 
   @impl true
@@ -58,9 +85,7 @@ defmodule GolfWeb.LobbyLive do
     {:noreply,
      socket
      |> assign(lobby: lobby, can_join?: can_join?)
-     |> stream(:users, lobby.users)
-     # TODO
-     # |> stream_insert(:users, new_user)
+     |> stream_insert(:users, new_user)
      |> put_flash(:info, "User joined: #{new_user.email}(id=#{new_user.id})")}
   end
 
@@ -70,16 +95,29 @@ defmodule GolfWeb.LobbyLive do
   end
 
   @impl true
-  def handle_event("start-game", params, socket) do
+  def handle_event("start-game", %{"num-rounds" => num_rounds}, socket) do
     id = socket.assigns.id
 
     unless Golf.GamesDb.game_exists?(id) do
-      %{valid?: true} = opts_cs = Opts.changeset(%Opts{}, params)
-      users = socket.assigns.lobby.users
-      {:ok, game} = Golf.GamesDb.create_game(id, users, opts_cs.data)
+      {num_rounds, _} = Integer.parse(num_rounds)
+      opts = %Opts{num_rounds: num_rounds}
+      {:ok, game} = Golf.GamesDb.create_game(id, socket.assigns.lobby.users, opts)
       :ok = Golf.broadcast("lobby:#{id}", {:game_created, game})
     end
 
     {:noreply, push_navigate(socket, to: ~p"/game/#{id}")}
+  end
+
+  @impl true
+  def handle_event("submit-chat", %{"content" => content}, socket) do
+    id = socket.assigns.id
+    user = socket.assigns.current_user
+
+    {:ok, message} =
+      Chat.Message.new(id, user, content)
+      |> Chat.insert_message()
+
+    :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
+    {:noreply, socket}
   end
 end

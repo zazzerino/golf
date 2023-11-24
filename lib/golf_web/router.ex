@@ -17,8 +17,6 @@ defmodule GolfWeb.Router do
     plug :accepts, ["json"]
   end
 
-  ## Authentication routes
-
   scope "/", GolfWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
@@ -40,6 +38,9 @@ defmodule GolfWeb.Router do
       on_mount: [{GolfWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+
+      live "/lobby/:id", LobbyLive
+      live "/game/:id", GameLive
     end
   end
 
@@ -54,8 +55,6 @@ defmodule GolfWeb.Router do
       live "/users/confirm", UserConfirmationInstructionsLive, :new
 
       live "/", HomeLive
-      live "/lobby/:id", LobbyLive
-      live "/game/:id", GameLive
     end
   end
 

@@ -23,11 +23,11 @@ defmodule Golf.Games do
   end
 
   def new_round(game) do
-    deck = Enum.shuffle(new_deck(@num_decks))
+    deck = new_deck(@num_decks) |> Enum.shuffle()
     num_hand_cards = @hand_size * length(game.players)
 
-    {:ok, hand_cards, deck} = deal_from_deck(deck, num_hand_cards)
-    {:ok, table_card, deck} = deal_from_deck(deck)
+    {:ok, hand_cards, deck} = deal_from(deck, num_hand_cards)
+    {:ok, table_card, deck} = deal_from(deck)
 
     hands =
       hand_cards
@@ -48,6 +48,7 @@ defmodule Golf.Games do
   def current_round(%Game{rounds: [round | _]}), do: round
   def current_round(_), do: nil
 
+  @spec current_state(any) :: any
   def current_state(%Game{rounds: [round | _]} = game)
       when round.state == :round_over and length(game.rounds) >= game.opts.num_rounds do
     :game_over
@@ -115,7 +116,7 @@ defmodule Golf.Games do
   end
 
   def round_changes(%Round{state: :take} = round, %Event{action: :take_deck} = event) do
-    {:ok, card, deck} = deal_from_deck(round.deck)
+    {:ok, card, deck} = deal_from(round.deck)
 
     %{
       state: :hold,
@@ -230,23 +231,29 @@ defmodule Golf.Games do
   def playable_cards(round, player, num_players) do
     if can_act_round?(round, player, num_players) do
       hand = Enum.at(round.hands, player.turn)
-      places(round.state, round.flipped?, hand)
+      card_places(round.state, round.flipped?, hand)
     else
       []
     end
   end
 
-  defp places(_state, _flipped?, _hand)
-  defp places(:take, true, hand), do: [:deck, :table] ++ face_down_cards(hand)
-  defp places(:take, false, _), do: [:deck, :table]
-  defp places(:flip, _, hand), do: face_down_cards(hand)
-  defp places(:hold, _, _), do: [:held, :hand_0, :hand_1, :hand_2, :hand_3, :hand_4, :hand_5]
+  defp card_places(_state, _flipped?, _hand)
+  defp card_places(:take, true, hand), do: [:deck, :table] ++ face_down_cards(hand)
+  defp card_places(:take, false, _), do: [:deck, :table]
+  defp card_places(:flip, _, hand), do: face_down_cards(hand)
+  defp card_places(:hold, _, _), do: [:held, :hand_0, :hand_1, :hand_2, :hand_3, :hand_4, :hand_5]
 
   def score(hand) do
     hand
     |> Enum.map(&rank_if_face_up/1)
     |> score_ranks(0)
   end
+
+  # "AS" -> ace of spades, "KH" -> king of hearts etc.
+  # The rank is the first char of the name. rank "AS" -> ?A
+  # rank_if_face_up?(%{"face_up" => true, "name" => "AS"}) == ?A
+  defp rank_if_face_up(%{"face_up?" => true, "name" => <<rank, _>>}), do: rank
+  defp rank_if_face_up(_), do: nil
 
   defp rank_value(rank) when is_integer(rank) do
     case rank do
@@ -263,9 +270,6 @@ defmodule Golf.Games do
       r when r in [?T, ?J, ?Q] -> 10
     end
   end
-
-  defp rank_if_face_up(%{"face_up?" => true, "name" => <<rank, _>>}), do: rank
-  defp rank_if_face_up(_), do: nil
 
   # Each hand consists of two rows of three cards.
   # Face down cards are represented by nil and ignored.
@@ -387,21 +391,21 @@ defmodule Golf.Games do
     @card_names ++ new_deck(n - 1)
   end
 
-  defp deal_from_deck([], _) do
+  defp deal_from([], _) do
     {:error, :empty_deck}
   end
 
-  defp deal_from_deck(deck, n) when length(deck) < n do
+  defp deal_from(deck, n) when length(deck) < n do
     {:error, :not_enough_cards}
   end
 
-  defp deal_from_deck(deck, n) do
+  defp deal_from(deck, n) do
     {cards, deck} = Enum.split(deck, n)
     {:ok, cards, deck}
   end
 
-  defp deal_from_deck(deck) do
-    with {:ok, [card], deck} <- deal_from_deck(deck, 1) do
+  defp deal_from(deck) do
+    with {:ok, [card], deck} <- deal_from(deck, 1) do
       {:ok, card, deck}
     end
   end

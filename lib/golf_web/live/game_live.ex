@@ -1,7 +1,9 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
-  alias Golf.{Games, GamesDb}
+  import GolfWeb.Components, only: [game_header: 1, chat: 1]
+
+  alias Golf.{Games, GamesDb, Chat}
   alias Golf.Games.{Player, Event}
   alias Golf.Games.ClientData, as: Data
 
@@ -9,15 +11,23 @@ defmodule GolfWeb.GameLive do
   def render(assigns) do
     ~H"""
     <div class="space-y-4">
-      <h2>
-        <span class="font-bold">Game</span> <%= @id %>
-      </h2>
+      <.game_header id={@id} />
+
+      <div :if={@game_over?} class="font-bold">
+        Game Over
+      </div>
 
       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
-      <.button :if={@can_start?} phx-click="start-game">
+      <.button :if={@can_start_game?} phx-click="start-game">
         Start Game
       </.button>
+
+      <.button :if={@can_start_round?} phx-click="start-round">
+        Start Next Round
+      </.button>
+
+      <.chat :if={@game} messages={@streams.chat_messages} submit="submit-chat" />
     </div>
     """
   end
@@ -26,6 +36,7 @@ defmodule GolfWeb.GameLive do
   def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
       send(self(), {:load_game, id})
+      send(self(), {:load_chat_messages, id})
     end
 
     {:ok,
@@ -33,8 +44,11 @@ defmodule GolfWeb.GameLive do
        page_title: "Game",
        id: id,
        game: nil,
-       can_start?: nil
-     )}
+       can_start_game?: nil,
+       can_start_round?: nil,
+       game_over?: nil
+     )
+     |> stream(:chat_messages, [])}
   end
 
   @impl true
@@ -45,18 +59,32 @@ defmodule GolfWeb.GameLive do
 
       game ->
         user = socket.assigns.current_user
-        data = Data.from(game, user)
         host? = user.id == game.host_id
+        data = Data.from(game, user)
 
         :ok = Golf.subscribe("game:#{id}")
 
         {:noreply,
          assign(socket,
            game: game,
-           can_start?: host? and data.state == :no_round
+           can_start_game?: host? and data.state == :no_round,
+           can_start_round?: host? and data.state == :round_over,
+           game_over?: data.state == :game_over
          )
          |> push_event("game-loaded", %{"game" => data})}
     end
+  end
+
+  @impl true
+  def handle_info({:load_chat_messages, id}, socket) do
+    messages = Golf.Chat.get_messages(id)
+    :ok = Golf.subscribe("chat:#{id}")
+    {:noreply, stream(socket, :chat_messages, messages, at: 0)}
+  end
+
+  @impl true
+  def handle_info({:new_chat_message, message}, socket) do
+    {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
   end
 
   @impl true
@@ -64,8 +92,17 @@ defmodule GolfWeb.GameLive do
     data = Data.from(game, socket.assigns.current_user)
 
     {:noreply,
-     assign(socket, game: game, can_start?: false)
+     assign(socket, game: game, can_start_game?: false)
      |> push_event("game-started", %{"game" => data})}
+  end
+
+  @impl true
+  def handle_info({:round_started, game}, socket) do
+    data = Data.from(game, socket.assigns.current_user)
+
+    {:noreply,
+     assign(socket, game: game, can_start_round?: false)
+     |> push_event("round-started", %{"game" => data})}
   end
 
   @impl true
@@ -78,9 +115,27 @@ defmodule GolfWeb.GameLive do
   end
 
   @impl true
+  def handle_info({:round_over, game}, socket) do
+    can_start_round? = socket.assigns.current_user.id == game.host_id
+    {:noreply, assign(socket, can_start_round?: can_start_round?)}
+  end
+
+  @impl true
+  def handle_info({:game_over, _game}, socket) do
+    {:noreply, assign(socket, game_over?: true)}
+  end
+
+  @impl true
   def handle_event("start-game", _params, socket) do
     {:ok, game} = GamesDb.start_round(socket.assigns.game)
     :ok = Golf.broadcast("game:#{game.id}", {:game_started, game})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("start-round", _params, socket) do
+    {:ok, game} = GamesDb.start_round(socket.assigns.game)
+    :ok = Golf.broadcast("game:#{game.id}", {:round_started, game})
     {:noreply, socket}
   end
 
@@ -108,14 +163,27 @@ defmodule GolfWeb.GameLive do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("submit-chat", %{"content" => content}, socket) do
+    id = socket.assigns.id
+    user = socket.assigns.current_user
+
+    {:ok, message} =
+      Chat.Message.new(id, user, content)
+      |> Chat.insert_message()
+
+    :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
+    {:noreply, socket}
+  end
+
   defp handle_game_event(game, place, player_id, hand_index \\ nil) do
     %Player{} = player = Enum.find(game.players, &(&1.id == player_id))
 
     state = Games.current_state(game)
     action = action_at(state, place)
     event = Event.new(game, player, action, hand_index)
-    {:ok, game} = GamesDb.handle_event(game, event) |> dbg()
 
+    {:ok, game} = GamesDb.handle_event(game, event)
     broadcast_game_event(game, event)
   end
 
@@ -126,23 +194,17 @@ defmodule GolfWeb.GameLive do
   defp action_at(:hold, "hand"), do: :swap
 
   defp broadcast_game_event(game, event) do
-    Golf.broadcast("game:#{game.id}", {:game_event, game, event})
+    topic = "game:#{game.id}"
+    state = Games.current_state(game)
+
+    Golf.broadcast(topic, {:game_event, game, event})
+
+    if state == :round_over do
+      Golf.broadcast(topic, {:round_over, game})
+    end
+
+    if state == :game_over do
+      Golf.broadcast(topic, {:game_over, game})
+    end
   end
-
-  # :ok = Golf.broadcast(topic(game.id), {:game_event, game, event})
-
-  # if Games.current_state(game) == :round_over do
-  #   :ok = Golf.broadcast(topic(game.id), {:round_over, game})
-  # end
-
-  # case Games.current_state(game) do
-  #   :round_over ->
-  #     :ok = Golf.broadcast(topic(game.id), {:round_over, game})
-
-  #   :game_over ->
-  #     :ok = Golf.broadcast(topic(game.id), {:game_over, game})
-
-  #   _ ->
-  #     nil
-  # end
 end

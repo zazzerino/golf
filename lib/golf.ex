@@ -1,4 +1,7 @@
 defmodule Golf do
+  @id_length 6
+  def id_length(), do: @id_length
+
   @doc """
   Generates a random 6 character id.
   https://gist.github.com/danschultzer/99c21ba403fd7f49a26cc40571ff5cce
