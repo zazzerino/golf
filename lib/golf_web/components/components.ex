@@ -16,8 +16,11 @@ defmodule GolfWeb.Components do
     <div>
       <h4 class="font-bold text-sm">Players</h4>
       <ol id="players-list" phx-update="stream">
-        <li :for={{_id, user} <- @users}>
-          User(id=<%= user.id %>, email=<%= user.email %>)
+        <li :for={{id, user} <- @users} id={id}>
+          <span class="text-blue-500">
+            <%= user.name %>
+          </span>
+           <span class="text-xs">(id=<%= user.id %>)</span>
         </li>
       </ol>
     </div>
@@ -56,7 +59,7 @@ defmodule GolfWeb.Components do
   def chat_messages(assigns) do
     ~H"""
     <div class="mt-2">
-      <h4 class="font-bold">Messages</h4>
+      <h4 class="font-bold text-sm">Messages</h4>
       <ul
         id="chat-messages"
         phx-update="stream"
@@ -64,7 +67,7 @@ defmodule GolfWeb.Components do
       >
         <li :for={{id, msg} <- @messages} id={id}>
           <span class="text-xs text-emerald-500"><%= msg.inserted_at %></span>
-          <span class="font-bold text-violet-500"><%= msg.username %></span>:
+          <span class="font-bold text-violet-500"><%= msg.user.name %></span>:
           <span><%= msg.content %></span>
         </li>
       </ul>
@@ -75,9 +78,34 @@ defmodule GolfWeb.Components do
   def chat_form(assigns) do
     ~H"""
     <form class="space-y-1" phx-submit={@submit}>
-      <.input name="content" value="" placeholder="Type chat message here..." required />
+      <.input
+        id="chat-form-input"
+        name="content"
+        value=""
+        placeholder="Type chat message here..."
+        required
+      />
       <.button>Submit</.button>
     </form>
+    """
+  end
+
+  def player_scores(assigns) do
+    ~H"""
+    <table class="mt-1 min-w-[10rem]">
+      <thead class="text-sm text-left">
+        <tr>
+          <th>User</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr :for={p <- @players}>
+          <td><%= p.user.name %></td>
+          <td><%= p.score %></td>
+        </tr>
+      </tbody>
+    </table>
     """
   end
 end

@@ -3,7 +3,6 @@ defmodule Golf.Chat do
 
   alias Golf.Repo
   alias Golf.Chat.Message
-  alias Golf.Accounts.User
 
   def insert_message(message) do
     message
@@ -14,18 +13,9 @@ defmodule Golf.Chat do
   def get_messages(topic) do
     from(m in Message,
       where: [topic: ^topic],
-      order_by: [asc: m.id],
-      join: u in User,
-      on: u.id == m.user_id,
-      select: m
+      order_by: [asc: m.id]
     )
     |> Repo.all()
     |> Repo.preload(:user)
-    |> Enum.map(&put_username/1)
-  end
-
-  defp put_username(msg) do
-    name = String.split(msg.user.email, "@") |> List.first()
-    Map.put(msg, :username, name)
   end
 end

@@ -17,7 +17,7 @@
         <li class="mr-auto text-[0.8125rem] leading-6 text-zinc-900">
           Logged in as:
           <span class="font-semibold text-fuchsia-500">
-            <%= @current_user.email |> String.split("@") |> Enum.at(0) %>
+            <%= @current_user.name |> String.split("@") |> Enum.at(0) %>
           </span>
         </li>
       <% end %>

@@ -7,6 +7,7 @@ defmodule Golf.Accounts.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
+    field :name, :string
 
     has_many :hosted_games, Golf.Games.Game, foreign_key: :host_id
     timestamps(type: :utc_datetime)
@@ -37,9 +38,10 @@ defmodule Golf.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :password, :name])
     |> validate_email(opts)
     |> validate_password(opts)
+    |> validate_required([:name])
   end
 
   defp validate_email(changeset, opts) do

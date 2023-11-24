@@ -34,6 +34,11 @@ hooks.GameCanvas = {
   }
 }
 
+window.addEventListener("phx:clear-chat-input", ev => {
+  const inputEl = document.querySelector("#chat-form-input");
+  inputEl.value = "";
+});
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {hooks, params: {_csrf_token: csrfToken}})
 

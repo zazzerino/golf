@@ -74,13 +74,18 @@ defmodule GolfWeb.LobbyLive do
   end
 
   @impl true
-  def handle_info({:new_chat_message, message}, socket) do
-    {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
+  def handle_info({:new_chat_message, new_message}, socket) do
+    {:noreply, stream_insert(socket, :chat_messages, new_message, at: 0)}
   end
 
   @impl true
   def handle_info({:user_joined, lobby, new_user}, socket) do
-    can_join? = not Enum.any?(lobby.users, &(&1.id == socket.assigns.current_user.id))
+    can_join? =
+      if new_user.id == socket.assigns.current_user.id do
+        false
+      else
+        socket.assigns.can_join?
+      end
 
     {:noreply,
      socket
@@ -118,6 +123,6 @@ defmodule GolfWeb.LobbyLive do
       |> Chat.insert_message()
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
-    {:noreply, socket}
+    {:noreply, push_event(socket, "clear-chat-input", %{})}
   end
 end

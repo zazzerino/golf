@@ -7,15 +7,13 @@ defmodule Golf.Chat.Message do
     field :topic, :string
     field :content, :string
 
-    field :username, :string, virtual: true
-
     timestamps(type: :utc_datetime)
   end
 
   def changeset(message, attrs \\ %{}) do
     message
-    |> cast(attrs, [:user_id, :username, :topic])
-    |> validate_required([:user_id, :topic])
+    |> cast(attrs, [:user_id, :topic, :content])
+    |> validate_required([:user_id, :topic, :content])
   end
 
   def new(topic, user, content) do
@@ -23,7 +21,7 @@ defmodule Golf.Chat.Message do
       topic: topic,
       content: content,
       user_id: user.id,
-      username: String.split(user.email, "@") |> List.first()
+      user: user
     }
   end
 end
