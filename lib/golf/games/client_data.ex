@@ -71,7 +71,7 @@ defmodule Golf.Games.ClientData do
   end
 
   defp put_position(player, pos) do
-    Map.put(player, :position, pos)
+    %{player | position: pos}
   end
 
   defp put_hands(players, []) do

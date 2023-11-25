@@ -126,7 +126,10 @@ defmodule GolfWeb.GameLive do
   @impl true
   def handle_info({:round_over, game}, socket) do
     can_start_round? = socket.assigns.current_user.id == game.host_id
-    {:noreply, assign(socket, can_start_round?: can_start_round?)}
+
+    {:noreply,
+     assign(socket, can_start_round?: can_start_round?)
+     |> push_event("round-over", %{})}
   end
 
   @impl true

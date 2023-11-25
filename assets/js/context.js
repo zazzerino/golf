@@ -14,7 +14,7 @@ function initSprites() {
     held: null,
     table: [],
     hands: { bottom: [], left: [], top: [], right: [], },
-    players: { bottom: [], left: [], top: [], right: [], },
+    players: {},
   }
 }
 
@@ -169,10 +169,22 @@ export class GameContext {
   onRoundStart(game) {
     this.game = game;
     this.removeSprites();
+
     this.addDeck();
     this.sprites.deck.x = CENTER_X;
+
+    for (const player of this.game.players) {
+      this.addPlayerText(player);
+    }
+
     this.onGameStart(game);
   }
+
+  // onRoundOver() {
+  //   for (const text of Object.values(this.sprites.players)) {
+  //     text.style.fill = PLAYER_NOTURN_COLOR;
+  //   }
+  // }
 
   onGameEvent(game, event) {
     this.game = game;
