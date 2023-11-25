@@ -1,12 +1,6 @@
 import * as PIXI from "pixi.js";
 import { OutlineFilter } from "@pixi/filter-outline";
 
-const GAME_WIDTH = 600;
-const GAME_HEIGHT = 600;
-
-const CENTER_X = GAME_WIDTH / 2;
-const CENTER_Y = GAME_HEIGHT / 2;
-
 const CARD_IMG_WIDTH = 88;
 const CARD_IMG_HEIGHT = 124;
 
@@ -15,19 +9,17 @@ const CARD_SCALE = 0.75;
 const CARD_WIDTH = CARD_IMG_WIDTH * CARD_SCALE;
 const CARD_HEIGHT = CARD_IMG_HEIGHT * CARD_SCALE;
 
-const DECK_X = CENTER_X - CARD_WIDTH / 2;
-const DECK_Y = CENTER_Y;
+const GAME_WIDTH = 600;
+const GAME_HEIGHT = 600;
 
-/**
-The deck png has 5 pixels of cards below the top card.
-This offset lets us place cards correctly on top of the deck.
-*/
-const DECK_Y_OFFSET = -5;
+export const CENTER_X = GAME_WIDTH / 2;
+export const CENTER_Y = GAME_HEIGHT / 2;
 
-const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + 2;
-const TABLE_CARD_Y = CENTER_Y;
+export const DECK_X = CENTER_X - CARD_WIDTH / 2;
+export const DECK_Y = CENTER_Y;
 
-const HAND_SIZE = 6;
+export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + 2;
+export const TABLE_CARD_Y = CENTER_Y;
 
 const HAND_X_PAD = 3;
 const HAND_Y_PAD = 10;
@@ -52,7 +44,7 @@ export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroun
   return renderer;
 }
 
-export function makeContainer() {
+export function makeStage() {
   return new PIXI.Container();
 }
 
@@ -122,7 +114,7 @@ export function makeUnplayable(sprite) {
   sprite.removeAllListeners();
 }
 
-function rotationAt(pos) {
+export function rotationAt(pos) {
   return pos === "left" || pos === "right"
     ? toRadians(90)
     : 0;

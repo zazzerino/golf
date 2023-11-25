@@ -16,11 +16,11 @@ defmodule GolfWeb.Components do
     <div>
       <h4 class="font-bold text-sm">Players</h4>
       <ol id="players-list" phx-update="stream">
-        <li :for={{id, user} <- @users} id={id}>
+        <li :for={{dom_id, user} <- @users} id={dom_id}>
           <span class="text-blue-500">
             <%= user.name %>
           </span>
-           <span class="text-xs">(id=<%= user.id %>)</span>
+          <span class="text-xs">(id=<%= user.id %>)</span>
         </li>
       </ol>
     </div>
@@ -65,7 +65,7 @@ defmodule GolfWeb.Components do
         phx-update="stream"
         class="overflow-y-auto h-[175px] bg-slate-100 rounded-lg"
       >
-        <li :for={{id, msg} <- @messages} id={id}>
+        <li :for={{dom_id, msg} <- @messages} id={dom_id}>
           <span class="text-xs text-emerald-500"><%= msg.inserted_at %></span>
           <span class="font-bold text-violet-500"><%= msg.user.name %></span>:
           <span><%= msg.content %></span>

@@ -1,8 +1,12 @@
 import { 
-  loadTextures, deckX, makeContainer, makeRenderer,
-  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,
-  makePlayable, makeUnplayable
+  CENTER_X, loadTextures, makeRenderer, makeStage, makePlayable, makeUnplayable,
+  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite, handCardCoord,
 } from "./canvas";
+
+import { 
+  updateTweens, handTweens, tweenWiggle, 
+  tweenDeck, tweenTable, tweenTakeDeck, tweenTakeTable, tweenDiscard, tweenSwapTable 
+} from "./tweens";
 
 function initSprites() {
   return {
@@ -19,9 +23,8 @@ export class GameContext {
     this.parentEl = parentEl;
     this.pushEvent = pushEvent;
 
+    this.stage = makeStage();
     this.renderer = makeRenderer();
-    this.stage = makeContainer();
-
     this.sprites = initSprites();
 
     loadTextures().then(textures => {
@@ -32,8 +35,9 @@ export class GameContext {
     });
   }
 
-  draw(_time) {
+  draw(time) {
     requestAnimationFrame(time => this.draw(time));
+    updateTweens(time);
     this.renderer.render(this.stage);
   }
 
@@ -91,8 +95,7 @@ export class GameContext {
   }
 
   addHand(player) {
-    const pos = player.position;
-    const sprites = makeHandSprites(this.textures, player.hand, pos);
+    const sprites = makeHandSprites(this.textures, player.hand, player.position);
     const belongsToUser = player.id === this.game.playerId;
 
     sprites.forEach((sprite, i) => {
@@ -100,7 +103,7 @@ export class GameContext {
         makePlayable(sprite, () => this.onHandClick(player.id, i));
       }
 
-      this.sprites.hands[pos][i] = sprite;
+      this.sprites.hands[player.position][i] = sprite;
       this.stage.addChild(sprite);
     });
   }
@@ -119,23 +122,34 @@ export class GameContext {
 
   onGameStart(game) {
     this.game = game;
-    this.sprites.deck.x = deckX(game.state);
-    this.addTableCards();
 
     for (const player of this.game.players) {
       this.addHand(player);
 
-      if (player.heldCard) {
-        this.addHeldCard(player);
-      }
+      handTweens(player.position, this.sprites.hands[player.position])
+        .forEach((tween, i) => {
+          tween.start();
+
+          // start tweening the deck after dealing the first row
+          if (i === 2) {
+            tween.onComplete(() => {
+              tweenDeck(this.sprites.deck)
+                .start()
+                .onComplete(() => {
+                  this.addTableCards();
+                  tweenTable(this.sprites.table[0]).start();
+                });
+            });
+          }
+        });
     }
   }
 
   onRoundStart(game) {
     this.game = game;
-
     this.removeSprites();
     this.addDeck();
+    this.sprites.deck.x = CENTER_X;
     this.onGameStart(game);
   }
 
@@ -167,13 +181,17 @@ export class GameContext {
     const player = this.game.players.find(p => p.id === event.player_id);
     if (!player) throw new Error("player is null on flip");
 
+    // get the sprite we need to update
     const handSprites = this.sprites.hands[player.position];
     const handSprite = handSprites[event.hand_index];
-    
+   
+    // update the sprite's texture
     const cardName = player.hand[event.hand_index]["name"];
     handSprite.texture = this.textures[cardName];
 
-    // tweenWiggle(handSprite).start();
+    // wiggle the sprite
+    const coord = handCardCoord(player.position, event.hand_index);
+    tweenWiggle(handSprite, coord.x).start();
 
     handSprites.forEach((sprite, i) => {
       if (!this.isPlayable(`hand_${i}`)) {
@@ -196,8 +214,9 @@ export class GameContext {
     if (!player) throw new Error("player is null on take deck");
 
     this.addHeldCard(player);
-
-    // tweenTakeDeck(player.position, heldSprite, this.sprites.deck).start();
+    
+    tweenTakeDeck(player.position, this.sprites.held, this.sprites.deck)
+      .start();
 
     if (player.id === this.game.playerId) {
       makePlayable(this.sprites.held, () => this.onHeldClick())
@@ -220,11 +239,8 @@ export class GameContext {
 
     this.addHeldCard(player);
     
-    // remove table sprite
-    const tableSprite = this.sprites.table.shift();
-    tableSprite.visible = false;
-
-    // tweenTakeTable(player.position, heldSprite, tableSprite).start();
+    tweenTakeTable(player.positions, this.sprites.held, this.sprites.table.shift())
+      .start();
 
     if (player.id === this.game.playerId) {
       makeUnplayable(this.sprites.deck);
@@ -241,14 +257,12 @@ export class GameContext {
     const player = this.game.players.find(p => p.id === event.player_id);
     if (!player) throw new Error("player is null on discard");
 
-    // add table card
     this.addTableCard(this.game.tableCards[0]);
 
-    // remove held card
-    this.sprites.held.visible = false;
-    this.sprites.held = null;
+    tweenDiscard(player.position, this.sprites.table[0], this.sprites.held)
+      .start();
 
-    // tweenDiscard(player.position, this.sprites.table[0], this.sprites.held).start();
+    this.sprites.held = null;
 
     this.sprites.hands[player.position].forEach((sprite, i) => {
       if (!this.isPlayable(`hand_${i}`)) {
@@ -283,12 +297,17 @@ export class GameContext {
     const card = player.hand[index].name;
 
     const handSprites = this.sprites.hands[player.position];
-    handSprites[index].texture = this.textures[card];
+    const handSprite = handSprites[index];
+    handSprite.texture = this.textures[card];
+
+    tweenSwapTable(player.position, this.sprites.table[0], handSprite)
+      .start();
 
     // remove held card
     this.sprites.held.visible = false
     this.sprites.held = null;
 
+    // if this is the last round, flip all the player's cards
     if (this.game.isFlipped) {
       handSprites.forEach((sprite, i) => {
         const card = player.hand[i].name;
@@ -314,20 +333,20 @@ export class GameContext {
 
   // client events
 
+  onHandClick(playerId, handIndex) {
+    this.pushEvent("card-click", { playerId, handIndex, place: "hand" });
+  }
+
   onDeckClick() {
-    this.pushEvent("deck-click", { playerId: this.game.playerId });
+    this.pushEvent("card-click", { playerId: this.game.playerId, place: "deck" });
   }
 
   onTableClick() {
-    this.pushEvent("table-click", { playerId: this.game.playerId });
-  }
-
-  onHandClick(playerId, handIndex) {
-    this.pushEvent("hand-click", { playerId, handIndex });
+    this.pushEvent("card-click", { playerId: this.game.playerId, place: "table" });
   }
 
   onHeldClick() {
-    this.pushEvent("held-click", { playerId: this.game.playerId });
+    this.pushEvent("card-click", { playerId: this.game.playerId, place: "held" });
   }
 
   // util

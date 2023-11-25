@@ -55,7 +55,10 @@ defmodule GolfWeb.GameLive do
   def handle_info({:load_game, id}, socket) do
     case GamesDb.get_game(id) do
       nil ->
-        {:noreply, push_navigate(socket, to: ~p"/")}
+        {:noreply,
+         socket
+         |> push_navigate(to: ~p"/")
+         |> put_flash(:error, "Game #{id} not found.")}
 
       game ->
         user = socket.assigns.current_user
@@ -140,26 +143,16 @@ defmodule GolfWeb.GameLive do
   end
 
   @impl true
-  def handle_event("hand-click", %{"playerId" => player_id, "handIndex" => hand_index}, socket) do
-    handle_game_event(socket.assigns.game, "hand", player_id, hand_index)
-    {:noreply, socket}
-  end
+  def handle_event("card-click", params, socket) do
+    game = socket.assigns.game
+    player = %Player{} = Enum.find(game.players, &(&1.id == params["playerId"]))
 
-  @impl true
-  def handle_event("deck-click", %{"playerId" => player_id}, socket) do
-    handle_game_event(socket.assigns.game, "deck", player_id)
-    {:noreply, socket}
-  end
+    state = Games.current_state(game)
+    action = action_at(state, params["place"])
+    event = Event.new(game, player, action, params["handIndex"])
+    {:ok, game} = GamesDb.handle_event(game, event)
 
-  @impl true
-  def handle_event("table-click", %{"playerId" => player_id}, socket) do
-    handle_game_event(socket.assigns.game, "table", player_id)
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("held-click", %{"playerId" => player_id}, socket) do
-    handle_game_event(socket.assigns.game, "held", player_id)
+    :ok = broadcast_game_event(game, event)
     {:noreply, socket}
   end
 
@@ -173,18 +166,7 @@ defmodule GolfWeb.GameLive do
       |> Chat.insert_message()
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
-    {:noreply, socket}
-  end
-
-  defp handle_game_event(game, place, player_id, hand_index \\ nil) do
-    %Player{} = player = Enum.find(game.players, &(&1.id == player_id))
-
-    state = Games.current_state(game)
-    action = action_at(state, place)
-    event = Event.new(game, player, action, hand_index)
-
-    {:ok, game} = GamesDb.handle_event(game, event)
-    broadcast_game_event(game, event)
+    {:noreply, push_event(socket, "clear-chat-input", %{})}
   end
 
   defp action_at(state, "hand") when state in [:flip_2, :flip], do: :flip
@@ -197,14 +179,17 @@ defmodule GolfWeb.GameLive do
     topic = "game:#{game.id}"
     state = Games.current_state(game)
 
-    Golf.broadcast(topic, {:game_event, game, event})
+    :ok = Golf.broadcast(topic, {:game_event, game, event})
 
-    if state == :round_over do
-      Golf.broadcast(topic, {:round_over, game})
-    end
+    case state do
+      :game_over ->
+        :ok = Golf.broadcast(topic, {:game_over, game})
 
-    if state == :game_over do
-      Golf.broadcast(topic, {:game_over, game})
+      :round_over ->
+        :ok = Golf.broadcast(topic, {:round_over, game})
+
+      _ ->
+        :ok
     end
   end
 end

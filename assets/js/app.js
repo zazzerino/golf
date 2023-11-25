@@ -34,7 +34,7 @@ hooks.GameCanvas = {
   }
 }
 
-window.addEventListener("phx:clear-chat-input", ev => {
+window.addEventListener("phx:clear-chat-input", _ => {
   const inputEl = document.querySelector("#chat-form-input");
   inputEl.value = "";
 });

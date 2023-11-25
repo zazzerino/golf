@@ -17,13 +17,13 @@ defmodule GolfWeb.LobbyLive do
 
       <.players_list :if={@lobby} users={@streams.users} />
 
+      <.chat :if={@lobby} messages={@streams.chat_messages} submit="submit-chat" />
+
       <.opts_form :if={@host?} submit="start-game" />
 
       <p :if={@host? == false} class="text-sm">
         Waiting for host to start game...
       </p>
-
-      <.chat :if={@lobby} messages={@streams.chat_messages} submit="submit-chat" />
     </div>
     """
   end
