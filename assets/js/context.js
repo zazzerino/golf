@@ -1,6 +1,6 @@
 import { 
-  CENTER_X, loadTextures, makeRenderer, makeStage, makePlayable, makeUnplayable,
-  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite, handCardCoord,
+  CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
+  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText, PLAYER_TURN_COLOR, PLAYER_NOTURN_COLOR,
 } from "./canvas";
 
 import { 
@@ -14,6 +14,7 @@ function initSprites() {
     held: null,
     table: [],
     hands: { bottom: [], left: [], top: [], right: [], },
+    players: { bottom: [], left: [], top: [], right: [], },
   }
 }
 
@@ -26,6 +27,7 @@ export class GameContext {
     this.stage = makeStage();
     this.renderer = makeRenderer();
     this.sprites = initSprites();
+    window.SPRITES = this.sprites;
 
     loadTextures().then(textures => {
       this.textures = textures;
@@ -51,11 +53,24 @@ export class GameContext {
 
       for (const player of this.game.players) {
         this.addHand(player);
+        this.addPlayerText(player);
 
         if (player.heldCard) {
           this.addHeldCard(player);
         }
       }
+    } else {
+      this.game.players.forEach(p => this.addPlayerText(p));
+    }
+  }
+
+  addPlayerText(player) {
+    const text = makePlayerText(player);
+    this.stage.addChild(text);
+    this.sprites.players[player.position] = text;
+
+    if (player.canAct) {
+      text.style.fill = PLAYER_TURN_COLOR;
     }
   }
 
@@ -109,7 +124,8 @@ export class GameContext {
   }
 
   addHeldCard(player) {
-    const sprite = makeHeldSprite(this.textures, player.heldCard, player.position);
+    const belongsToUser = player.id === this.game.playerId;
+    const sprite = makeHeldSprite(this.textures, player.heldCard, player.position, belongsToUser);
     this.sprites.held = sprite;
     this.stage.addChild(sprite);
 
@@ -126,6 +142,9 @@ export class GameContext {
     for (const player of this.game.players) {
       this.addHand(player);
 
+      const textSprite = this.sprites.players[player.position];
+      textSprite.style.fill = PLAYER_TURN_COLOR;
+
       handTweens(player.position, this.sprites.hands[player.position])
         .forEach((tween, i) => {
           tween.start();
@@ -137,7 +156,9 @@ export class GameContext {
                 .start()
                 .onComplete(() => {
                   this.addTableCards();
-                  tweenTable(this.sprites.table[0]).start();
+
+                  tweenTable(this.sprites.table[0])
+                    .start();
                 });
             });
           }
@@ -155,6 +176,12 @@ export class GameContext {
 
   onGameEvent(game, event) {
     this.game = game;
+
+    for (const player of game.players) {
+      const sprite = this.sprites.players[player.position];
+      const color = player.canAct ? PLAYER_TURN_COLOR : PLAYER_NOTURN_COLOR;
+      sprite.style.fill = color;
+    }
 
     switch (event.action) {
       case "flip":
@@ -239,7 +266,7 @@ export class GameContext {
 
     this.addHeldCard(player);
     
-    tweenTakeTable(player.positions, this.sprites.held, this.sprites.table.shift())
+    tweenTakeTable(player.position, this.sprites.held, this.sprites.table.shift())
       .start();
 
     if (player.id === this.game.playerId) {

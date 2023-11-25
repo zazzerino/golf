@@ -35,6 +35,7 @@ defmodule Golf.Games.ClientData do
       game.players
       |> maybe_rotate(index)
       |> put_hands(hands)
+      |> Enum.map(&put_can_act?(&1, game))
       |> Enum.map(&put_username/1)
       |> Enum.map(&put_held_card(&1, held_card))
       |> Enum.zip_with(positions, &put_position/2)
@@ -61,9 +62,12 @@ defmodule Golf.Games.ClientData do
     end
   end
 
+  defp put_can_act?(player, game) do
+    %{player | canAct: Golf.Games.can_act?(game, player)}
+  end
+
   defp put_username(player) do
-    [name, _] = String.split(player.user.email, "@")
-    Map.put(player, :username, name)
+    %{player | username: player.user.name}
   end
 
   defp put_position(player, pos) do

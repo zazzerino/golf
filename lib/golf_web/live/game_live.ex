@@ -1,7 +1,7 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
-  import GolfWeb.Components, only: [game_header: 1, chat: 1]
+  import GolfWeb.Components, only: [game_header: 1, chat: 1, player_scores: 1]
 
   alias Golf.{Games, GamesDb, Chat}
   alias Golf.Games.{Player, Event}
@@ -24,8 +24,12 @@ defmodule GolfWeb.GameLive do
       </.button>
 
       <.button :if={@can_start_round?} phx-click="start-round">
-        Start Next Round
+        Start Round
       </.button>
+
+      <div :if={@game}>
+        <.player_scores players={@players} />
+      </div>
 
       <.chat :if={@game} messages={@streams.chat_messages} submit="submit-chat" />
     </div>
@@ -44,6 +48,7 @@ defmodule GolfWeb.GameLive do
        page_title: "Game",
        id: id,
        game: nil,
+       players: [],
        can_start_game?: nil,
        can_start_round?: nil,
        game_over?: nil
@@ -70,6 +75,7 @@ defmodule GolfWeb.GameLive do
         {:noreply,
          assign(socket,
            game: game,
+           players: data.players,
            can_start_game?: host? and data.state == :no_round,
            can_start_round?: host? and data.state == :round_over,
            game_over?: data.state == :game_over
@@ -113,7 +119,7 @@ defmodule GolfWeb.GameLive do
     data = Data.from(game, socket.assigns.current_user)
 
     {:noreply,
-     assign(socket, game: game)
+     assign(socket, game: game, players: data.players)
      |> push_event("game-event", %{"game" => data, "event" => event})}
   end
 

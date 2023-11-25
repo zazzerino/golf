@@ -91,7 +91,7 @@ defmodule GolfWeb.LobbyLive do
      socket
      |> assign(lobby: lobby, can_join?: can_join?)
      |> stream_insert(:users, new_user)
-     |> put_flash(:info, "User joined: #{new_user.email}(id=#{new_user.id})")}
+     |> put_flash(:info, "User joined: #{new_user.name}(id=#{new_user.id})")}
   end
 
   @impl true
@@ -116,10 +116,9 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def handle_event("submit-chat", %{"content" => content}, socket) do
     id = socket.assigns.id
-    user = socket.assigns.current_user
 
     {:ok, message} =
-      Chat.Message.new(id, user, content)
+      Chat.Message.new(id, socket.assigns.current_user, content)
       |> Chat.insert_message()
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})

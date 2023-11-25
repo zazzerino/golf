@@ -92,7 +92,7 @@ defmodule GolfWeb.Components do
 
   def player_scores(assigns) do
     ~H"""
-    <table class="mt-1 min-w-[10rem]">
+    <table class="mt-1 min-w-[8rem]">
       <thead class="text-sm text-left">
         <tr>
           <th>User</th>

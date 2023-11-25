@@ -123,7 +123,7 @@ export function tweenSwapTable(pos, tableSprite, handSprite) {
   tableSprite.rotation = rotationAt(pos);
 
   return new Tween(tableSprite)
-    .to({ x: TABLE_CARD_X, y: TABLE_CARD_Y, }, 800)
+    .to({ x: TABLE_CARD_X, y: TABLE_CARD_Y, rotation: 0, }, 800)
     .easing(Easing.Quadratic.InOut);
 }
 

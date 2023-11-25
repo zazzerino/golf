@@ -2,7 +2,8 @@ defmodule Golf.Games.Player do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, only: [:id, :username, :turn, :position, :score, :hand, :heldCard]}
+  @derive {Jason.Encoder,
+           only: [:id, :username, :turn, :position, :score, :hand, :heldCard, :canAct]}
   schema "players" do
     belongs_to :game, Golf.Games.Game, type: :string
     belongs_to :user, Golf.Accounts.User
@@ -15,6 +16,7 @@ defmodule Golf.Games.Player do
 
     field :hand, {:array, :map}, virtual: true
     field :heldCard, :string, virtual: true
+    field :canAct, :boolean, virtual: true
   end
 
   def changeset(player, attrs \\ %{}) do
