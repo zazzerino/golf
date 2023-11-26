@@ -29,7 +29,7 @@ defmodule GolfWeb.LobbyLive do
     """
   end
 
-      # <div :if={!@lobby} class="text-sm text-center">Loading...</div>
+  # <div :if={!@lobby} class="text-sm text-center">Loading...</div>
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do

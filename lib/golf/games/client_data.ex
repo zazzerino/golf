@@ -9,7 +9,8 @@ defmodule Golf.Games.ClientData do
     :tableCards,
     :players,
     :playerId,
-    :playableCards
+    :playableCards,
+    :roundNum
   ]
 
   def from(game, user) do
@@ -21,7 +22,6 @@ defmodule Golf.Games.ClientData do
 
     round = Golf.Games.current_round(game)
     turn = if round, do: round.turn
-    hands = if round, do: maybe_rotate(round.hands, index), else: []
     held_card = if round, do: round.held_card
 
     playable_cards =
@@ -33,12 +33,10 @@ defmodule Golf.Games.ClientData do
 
     players =
       game.players
+      |> put_hands((round && round.hands) || [])
       |> maybe_rotate(index)
-      |> put_hands(hands)
-      |> Enum.map(&put_can_act?(&1, game))
-      |> Enum.map(&put_username/1)
-      |> Enum.map(&put_held_card(&1, held_card))
       |> Enum.zip_with(positions, &put_position/2)
+      |> Enum.map(&put_player_data(&1, game, held_card))
 
     %__MODULE__{
       id: game.id,
@@ -49,7 +47,8 @@ defmodule Golf.Games.ClientData do
       tableCards: (round && round.table_cards) || [],
       players: players,
       playerId: player && player.id,
-      playableCards: playable_cards
+      playableCards: playable_cards,
+      roundNum: length(game.rounds)
     }
   end
 
@@ -62,13 +61,18 @@ defmodule Golf.Games.ClientData do
     end
   end
 
-  defp put_can_act?(player, game) do
-    %{player | canAct: Golf.Games.can_act?(game, player)}
+  defp put_player_data(player, game, held_card) do
+    player
+    |> Map.put(:username, player.user.name)
+    |> Map.put(:canAct, Golf.Games.can_act?(game, player))
+    |> put_held_card(held_card)
   end
 
-  defp put_username(player) do
-    %{player | username: player.user.name}
+  defp put_held_card(p, %{"player_id" => card_pid} = card) when p.id == card_pid do
+    %{p | heldCard: card["name"]}
   end
+
+  defp put_held_card(player, _), do: player
 
   defp put_position(player, pos) do
     %{player | position: pos}
@@ -83,12 +87,6 @@ defmodule Golf.Games.ClientData do
       %{p | hand: hand, score: Golf.Games.score(hand)}
     end)
   end
-
-  defp put_held_card(p, %{"player_id" => card_pid} = card) when p.id == card_pid do
-    %{p | heldCard: card["name"]}
-  end
-
-  defp put_held_card(player, _), do: player
 
   def maybe_rotate(list, n) when n in [0, nil], do: list
   def maybe_rotate(list, n), do: Golf.rotate(list, n)

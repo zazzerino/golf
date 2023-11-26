@@ -112,6 +112,7 @@ export function makeHandSprites(textures, hand, pos) {
         break;
 
       case "right":
+        coord.x += 5;
         break;
     }
 
@@ -141,7 +142,6 @@ export function makePlayerText(player) {
   });
 
   const content = `${player.username}(${player.score}pts)`;
-  // const content = player.username;
   const text = new PIXI.Text(content, style);
 
   switch (player.position) {
@@ -173,6 +173,19 @@ export function makePlayerText(player) {
       throw new Error(`invalid pos: ${pos}`);
   }
 
+  return text;
+}
+
+export function makeRoundText(roundNum) {
+  const style = new PIXI.TextStyle({
+    fill: PLAYER_NOTURN_COLOR,
+    fontFamily: "monospace",
+  });
+
+  const content = `Round ${roundNum}`;
+  const text = new PIXI.Text(content, style);
+  text.x = 5;
+  text.y = 5;
   return text;
 }
 

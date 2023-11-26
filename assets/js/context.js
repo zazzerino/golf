@@ -1,6 +1,6 @@
 import { 
   CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
-  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText, PLAYER_TURN_COLOR, PLAYER_NOTURN_COLOR,
+  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText, PLAYER_TURN_COLOR, PLAYER_NOTURN_COLOR, makeRoundText,
 } from "./canvas";
 
 import { 
@@ -15,6 +15,7 @@ function initSprites() {
     table: [],
     hands: { bottom: [], left: [], top: [], right: [], },
     players: {},
+    round: null,
   }
 }
 
@@ -46,6 +47,7 @@ export class GameContext {
   // sprites
 
   addSprites() {
+    this.addRoundText();
     this.addDeck();
 
     if (this.game.state !== "no_round") {
@@ -61,16 +63,6 @@ export class GameContext {
       }
     } else {
       this.game.players.forEach(p => this.addPlayerText(p));
-    }
-  }
-
-  addPlayerText(player) {
-    const text = makePlayerText(player);
-    this.stage.addChild(text);
-    this.sprites.players[player.position] = text;
-
-    if (player.canAct) {
-      text.style.fill = PLAYER_TURN_COLOR;
     }
   }
 
@@ -126,6 +118,7 @@ export class GameContext {
   addHeldCard(player) {
     const belongsToUser = player.id === this.game.playerId;
     const sprite = makeHeldSprite(this.textures, player.heldCard, player.position, belongsToUser);
+    
     this.sprites.held = sprite;
     this.stage.addChild(sprite);
 
@@ -134,16 +127,45 @@ export class GameContext {
     }
   }
 
+  addPlayerText(player) {
+    const text = makePlayerText(player);
+    this.stage.addChild(text);
+    this.sprites.players[player.position] = text;
+
+    if (player.canAct) {
+      text.style.fill = PLAYER_TURN_COLOR;
+    }
+  }
+
+  updatePlayerTexts() {
+    for (const player of this.game.players) {
+      const sprite = this.sprites.players[player.position];
+      const color = player.canAct ? PLAYER_TURN_COLOR : PLAYER_NOTURN_COLOR;
+      
+      sprite.text = `${player.username}(${player.score}pts)`;
+      sprite.style.fill = color;
+    }
+  }
+
+  addRoundText() {
+    const text = makeRoundText(this.game.roundNum);
+    this.stage.addChild(text);
+    this.sprites.round = text;
+  }
+
   // server events
 
   onGameStart(game) {
     this.game = game;
 
+    const roundSprite = this.sprites.round;
+    roundSprite.text = `Round ${game.roundNum}`;
+
     for (const player of this.game.players) {
       this.addHand(player);
 
-      const textSprite = this.sprites.players[player.position];
-      textSprite.style.fill = PLAYER_TURN_COLOR;
+      const playerSprite = this.sprites.players[player.position];
+      playerSprite.style.fill = PLAYER_TURN_COLOR;
 
       handTweens(player.position, this.sprites.hands[player.position])
         .forEach((tween, i) => {
@@ -173,6 +195,10 @@ export class GameContext {
     this.addDeck();
     this.sprites.deck.x = CENTER_X;
 
+    this.addRoundText();
+    const roundSprite = this.sprites.round;
+    roundSprite.text = `Round ${game.roundNum}`;
+
     for (const player of this.game.players) {
       this.addPlayerText(player);
     }
@@ -182,14 +208,7 @@ export class GameContext {
 
   onGameEvent(game, event) {
     this.game = game;
-
-    for (const player of game.players) {
-      const sprite = this.sprites.players[player.position];
-      const color = player.canAct ? PLAYER_TURN_COLOR : PLAYER_NOTURN_COLOR;
-      
-      sprite.text = `${player.username}(${player.score}pts)`;
-      sprite.style.fill = color;
-    }
+    this.updatePlayerTexts();
 
     switch (event.action) {
       case "flip":
