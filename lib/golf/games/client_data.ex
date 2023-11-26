@@ -21,7 +21,6 @@ defmodule Golf.Games.ClientData do
     positions = player_positions(num_players)
 
     round = Golf.Games.current_round(game)
-    turn = if round, do: round.turn
     held_card = if round, do: round.held_card
 
     playable_cards =
@@ -40,7 +39,7 @@ defmodule Golf.Games.ClientData do
 
     %__MODULE__{
       id: game.id,
-      turn: turn,
+      turn: (round && round.turn) || 0,
       state: Golf.Games.current_state(game),
       isFlipped: round && round.flipped?,
       deck: (round && round.deck) || [],

@@ -1,6 +1,7 @@
 import { 
   CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
-  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText, PLAYER_TURN_COLOR, PLAYER_NOTURN_COLOR, makeRoundText,
+  makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
+  PLAYER_TURN_COLOR, PLAYER_NOTURN_COLOR, makeRoundText, makeTurnText,
 } from "./canvas";
 
 import { 
@@ -16,6 +17,7 @@ function initSprites() {
     hands: { bottom: [], left: [], top: [], right: [], },
     players: {},
     round: null,
+    turn: null,
   }
 }
 
@@ -48,6 +50,8 @@ export class GameContext {
 
   addSprites() {
     this.addRoundText();
+    this.addTurnText();
+
     this.addDeck();
 
     if (this.game.state !== "no_round") {
@@ -153,6 +157,17 @@ export class GameContext {
     this.sprites.round = text;
   }
 
+  addTurnText() {
+    const text = makeTurnText(this.game.turn);
+    this.stage.addChild(text);
+    this.sprites.turn = text;
+  }
+
+  updateTurnText() {
+    const turnSprite = this.sprites.turn;
+    turnSprite.text = `Turn ${this.game.turn}`;
+  }
+
   // server events
 
   onGameStart(game) {
@@ -196,8 +211,7 @@ export class GameContext {
     this.sprites.deck.x = CENTER_X;
 
     this.addRoundText();
-    const roundSprite = this.sprites.round;
-    roundSprite.text = `Round ${game.roundNum}`;
+    this.addTurnText();
 
     for (const player of this.game.players) {
       this.addPlayerText(player);
@@ -208,7 +222,9 @@ export class GameContext {
 
   onGameEvent(game, event) {
     this.game = game;
+
     this.updatePlayerTexts();
+    this.updateTurnText();
 
     switch (event.action) {
       case "flip":

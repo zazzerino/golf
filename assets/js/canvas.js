@@ -189,6 +189,20 @@ export function makeRoundText(roundNum) {
   return text;
 }
 
+export function makeTurnText(turn) {
+  const style = new PIXI.TextStyle({
+    fill: PLAYER_NOTURN_COLOR,
+    fontFamily: "monospace",
+  });
+
+  const content = `Turn ${turn}`;
+  const text = new PIXI.Text(content, style);
+  text.anchor.set(0.0, 0.0);
+  text.x = 5;
+  text.y = 35;
+  return text;
+}
+
 // interactive
 
 const PLAYABLE_FILTER = new OutlineFilter(2, 0xff00ff, 1.0);
