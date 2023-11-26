@@ -8,28 +8,28 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-xl space-y-12 divide-y">
+    <div class="mx-auto max-w-md space-y-12 divide-y text-center">
       <h1 class="leading-8 text-zinc-800 text-center">
         <div>
-          <span class="text-lg font-semibold">Lobby</span>
-          <span class="text-green-500"><%= @id %></span>
+          <span class="text-lg font-bold">Lobby</span>
+          <span class="text-green-500 font-semibold"><%= @id %></span>
         </div>
       </h1>
 
-      <div :if={!@lobby} class="text-sm">Loading...</div>
+      <.players_list users={@streams.users} />
 
-      <.players_list :if={@lobby} users={@streams.users} />
-
-      <.chat :if={@lobby} messages={@streams.chat_messages} submit="submit-chat" />
+      <.chat messages={@streams.chat_messages} submit="submit-chat" />
 
       <.opts_form :if={@host?} submit="start-game" />
 
-      <p :if={@host? == false} class="text-sm text-center">
+      <p :if={@host? == false} class="text-center">
         Waiting for host to start game...
       </p>
     </div>
     """
   end
+
+      # <div :if={!@lobby} class="text-sm text-center">Loading...</div>
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -123,6 +123,8 @@ defmodule GolfWeb.LobbyLive do
     {:ok, message} =
       Chat.Message.new(id, socket.assigns.current_user, content)
       |> Chat.insert_message()
+
+    message = Map.update!(message, :inserted_at, &Chat.format_chat_time/1)
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
     {:noreply, push_event(socket, "clear-chat-input", %{})}

@@ -13,8 +13,8 @@ defmodule GolfWeb.GameLive do
     <div class="mx-auto max-w-[600px] space-y-4">
       <h1 class="leading-8 text-zinc-800 text-center">
         <div>
-          <span class="text-lg font-semibold">Game</span>
-          <span class="text-green-500"><%= @id %></span>
+          <span class="text-lg font-bold">Game</span>
+          <span class="text-green-500 font-semibold"><%= @id %></span>
         </div>
       </h1>
 
@@ -176,6 +176,8 @@ defmodule GolfWeb.GameLive do
     {:ok, message} =
       Chat.Message.new(id, user, content)
       |> Chat.insert_message()
+
+    message = Map.update!(message, :inserted_at, &Chat.format_chat_time/1)
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
     {:noreply, push_event(socket, "clear-chat-input", %{})}

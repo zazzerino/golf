@@ -25,6 +25,25 @@ defmodule Golf.GamesDb do
     |> Repo.exists?()
   end
 
+  def get_user_games(user_id) do
+    from(p in Player,
+      where: [user_id: ^user_id],
+      join: g in Game,
+      on: [id: p.game_id],
+      select: g
+    )
+    |> Repo.all()
+    |> Enum.map(&format_game_time/1)
+  end
+
+  defp format_game_time(game) do
+    Map.update!(game, :inserted_at, &format_game_dt/1)
+  end
+
+  defp format_game_dt(dt) do
+    Calendar.strftime(dt, "%y/%m/%d %H:%m:%S")
+  end
+
   def create_game(id, users, opts \\ Opts.default()) do
     Games.new_game(id, users, opts)
     |> insert_game()

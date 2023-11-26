@@ -5,11 +5,10 @@ defmodule GolfWeb.HomeLive do
   # we need the id length as a constant in this module so we can use it in guards
   @id_length Golf.id_length()
 
-  # <h2 class="font-bold">Home</h2>
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm space-y-6">
+    <div class="mx-auto max-w-sm space-y-6 text-center">
       <.header class="text-center">Home</.header>
 
       <p :if={!@current_user} class="text-center">
@@ -19,7 +18,7 @@ defmodule GolfWeb.HomeLive do
       <.join_lobby_form :if={@current_user} submit="join-lobby" />
 
       <.button :if={@current_user} phx-click="create-lobby">
-        Create Game
+        New Game
       </.button>
     </div>
     """
@@ -55,7 +54,7 @@ defmodule GolfWeb.HomeLive do
 
   @impl true
   def handle_event("join-lobby", %{"id" => id}, socket) when byte_size(id) != @id_length do
-    message = "Game ID should be #{@id_length} chars long."
+    message = "Game ID should be #{@id_length} characters long."
     {:noreply, put_flash(socket, :error, message)}
   end
 
@@ -63,7 +62,7 @@ defmodule GolfWeb.HomeLive do
   def handle_event("join-lobby", %{"id" => id}, socket) do
     case Golf.Lobbies.get_lobby(String.downcase(id)) do
       nil ->
-        {:noreply, put_flash(socket, :error, "Lobby #{id} not found.")}
+        {:noreply, put_flash(socket, :error, "Game #{id} not found.")}
 
       lobby ->
         user = socket.assigns.current_user
