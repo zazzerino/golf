@@ -14,6 +14,12 @@ defmodule GolfWeb.UserSessionController do
     |> create(params, "Password updated successfully!")
   end
 
+  def create(conn, %{"_action" => "name_updated"} = params) do
+    conn
+    |> put_session(:user_return_to, ~p"/users/settings")
+    |> create(params, "Name updated successfully!")
+  end
+
   def create(conn, params) do
     create(conn, params, "Welcome back!")
   end

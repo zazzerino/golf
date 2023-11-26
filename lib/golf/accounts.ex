@@ -108,6 +108,10 @@ defmodule Golf.Accounts do
     User.email_changeset(user, attrs, validate_email: false)
   end
 
+  def change_user_name(user, attrs \\ %{}) do
+    User.name_changeset(user, attrs)
+  end
+
   @doc """
   Emulates that the email will change without actually changing
   it in the database.
@@ -124,6 +128,13 @@ defmodule Golf.Accounts do
   def apply_user_email(user, password, attrs) do
     user
     |> User.email_changeset(attrs)
+    |> User.validate_current_password(password)
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
+  def apply_user_name(user, password, attrs) do
+    user
+    |> User.name_changeset(attrs)
     |> User.validate_current_password(password)
     |> Ecto.Changeset.apply_action(:update)
   end
@@ -213,6 +224,13 @@ defmodule Golf.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  def update_user_name(user, password, attrs) do
+    user
+    |> User.name_changeset(attrs)
+    |> User.validate_current_password(password)
+    |> Repo.update()
   end
 
   ## Session

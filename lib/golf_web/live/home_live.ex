@@ -15,11 +15,11 @@ defmodule GolfWeb.HomeLive do
         <.register_link /> or <.login_link /> to play.
       </p>
 
+      <.join_lobby_form :if={@current_user} submit="join-lobby" />
+
       <.button :if={@current_user} phx-click="create-lobby">
         Create Game
       </.button>
-
-      <.join_lobby_form :if={@current_user} submit="join-lobby" />
     </div>
     """
   end
