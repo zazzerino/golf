@@ -1,7 +1,7 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
-  import GolfWeb.Components, only: [game_header: 1, chat: 1, player_scores: 1]
+  import GolfWeb.Components, only: [chat: 1]
 
   alias Golf.{Games, GamesDb, Chat}
   alias Golf.Games.{Player, Event}
@@ -10,28 +10,33 @@ defmodule GolfWeb.GameLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <.game_header id={@id} />
+    <div class="mx-auto max-w-[600px] space-y-4">
+      <h1 class="leading-8 text-zinc-800 text-center">
+        <div>
+          <span class="text-lg font-semibold">Game</span>
+          <span class="text-green-500"><%= @id %></span>
+        </div>
+      </h1>
 
-      <div :if={@game_over?} class="font-bold">
+      <div :if={@game_over?} class="mt-[-20rem] font-semibold text-center">
         Game Over
       </div>
 
-      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
+      <div class="space-y-1">
+        <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
-      <.button :if={@can_start_game?} phx-click="start-game">
-        Start Game
-      </.button>
+        <div>
+          <.button :if={@can_start_game?} phx-click="start-game">
+            Start Game
+          </.button>
 
-      <.button :if={@can_start_round?} phx-click="start-round">
-        Start Round
-      </.button>
+          <.button :if={@can_start_round?} phx-click="start-round">
+            Start Round
+          </.button>
+        </div>
 
-      <div :if={@game}>
-        <.player_scores players={@players} />
+        <.chat :if={@game} messages={@streams.chat_messages} submit="submit-chat" />
       </div>
-
-      <.chat :if={@game} messages={@streams.chat_messages} submit="submit-chat" />
     </div>
     """
   end
@@ -48,7 +53,6 @@ defmodule GolfWeb.GameLive do
        page_title: "Game",
        id: id,
        game: nil,
-       players: [],
        can_start_game?: nil,
        can_start_round?: nil,
        game_over?: nil
@@ -75,7 +79,6 @@ defmodule GolfWeb.GameLive do
         {:noreply,
          assign(socket,
            game: game,
-           players: data.players,
            can_start_game?: host? and data.state == :no_round,
            can_start_round?: host? and data.state == :round_over,
            game_over?: data.state == :game_over
@@ -119,7 +122,7 @@ defmodule GolfWeb.GameLive do
     data = Data.from(game, socket.assigns.current_user)
 
     {:noreply,
-     assign(socket, game: game, players: data.players)
+     assign(socket, game: game)
      |> push_event("game-event", %{"game" => data, "event" => event})}
   end
 

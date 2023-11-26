@@ -8,12 +8,15 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <h2>
-        <span class="font-bold">Lobby</span> <%= @id %>
-      </h2>
+    <div class="mx-auto max-w-xl space-y-12 divide-y">
+      <h1 class="leading-8 text-zinc-800 text-center">
+        <div>
+          <span class="text-lg font-semibold">Lobby</span>
+          <span class="text-green-500"><%= @id %></span>
+        </div>
+      </h1>
 
-      <div :if={!@lobby}>Loading...</div>
+      <div :if={!@lobby} class="text-sm">Loading...</div>
 
       <.players_list :if={@lobby} users={@streams.users} />
 
@@ -21,7 +24,7 @@ defmodule GolfWeb.LobbyLive do
 
       <.opts_form :if={@host?} submit="start-game" />
 
-      <p :if={@host? == false} class="text-sm">
+      <p :if={@host? == false} class="text-sm text-center">
         Waiting for host to start game...
       </p>
     </div>

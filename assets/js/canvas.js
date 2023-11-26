@@ -140,8 +140,8 @@ export function makePlayerText(player) {
     // fontFamily: "Comic Sans MS",
   });
 
-  // const content = `${player.username}(${player.score})`;
-  const content = player.username;
+  const content = `${player.username}(${player.score}pts)`;
+  // const content = player.username;
   const text = new PIXI.Text(content, style);
 
   switch (player.position) {

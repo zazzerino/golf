@@ -180,18 +180,14 @@ export class GameContext {
     this.onGameStart(game);
   }
 
-  // onRoundOver() {
-  //   for (const text of Object.values(this.sprites.players)) {
-  //     text.style.fill = PLAYER_NOTURN_COLOR;
-  //   }
-  // }
-
   onGameEvent(game, event) {
     this.game = game;
 
     for (const player of game.players) {
       const sprite = this.sprites.players[player.position];
       const color = player.canAct ? PLAYER_TURN_COLOR : PLAYER_NOTURN_COLOR;
+      
+      sprite.text = `${player.username}(${player.score}pts)`;
       sprite.style.fill = color;
     }
 

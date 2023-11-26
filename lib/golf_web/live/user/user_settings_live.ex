@@ -7,7 +7,6 @@ defmodule GolfWeb.UserSettingsLive do
     ~H"""
     <.header class="text-center">
       Account Settings
-      <:subtitle>Manage your account settings</:subtitle>
     </.header>
 
     <div class="space-y-12 divide-y">

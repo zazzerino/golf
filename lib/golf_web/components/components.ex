@@ -13,11 +13,11 @@ defmodule GolfWeb.Components do
 
   def players_list(assigns) do
     ~H"""
-    <div>
-      <h4 class="font-bold text-sm">Players</h4>
-      <ol id="players-list" phx-update="stream">
+    <div class="flex-none">
+      <h4 class="font-semibold text-md">Players</h4>
+      <ol id="players-list" phx-update="stream" class="bg-green-200 p-2">
         <li :for={{dom_id, user} <- @users} id={dom_id}>
-          <span class="text-blue-500">
+          <span class="text-blue-500 font-semibold">
             <%= user.name %>
           </span>
           <span class="text-xs">(id=<%= user.id %>)</span>
@@ -30,7 +30,7 @@ defmodule GolfWeb.Components do
   def opts_form(assigns) do
     ~H"""
     <div>
-      <h4 class="font-bold text-sm">Settings</h4>
+      <h4 class="font-semibold text-md">Settings</h4>
       <form phx-submit={@submit} class="space-y-1">
         <.input name="num-rounds" type="number" min="1" max="50" label="Number of rounds" value="1" />
         <.button>Start Game</.button>
@@ -49,7 +49,7 @@ defmodule GolfWeb.Components do
 
   def chat(assigns) do
     ~H"""
-    <div class="w-[600px]">
+    <div class="flex-auto">
       <.chat_messages messages={@messages} />
       <.chat_form submit={@submit} />
     </div>
@@ -58,16 +58,16 @@ defmodule GolfWeb.Components do
 
   def chat_messages(assigns) do
     ~H"""
-    <div class="mt-2">
-      <h4 class="font-bold text-sm">Messages</h4>
+    <div class="">
+      <h4 class="font-semibold text-md">Messages</h4>
       <ul
         id="chat-messages"
         phx-update="stream"
-        class="overflow-y-auto h-[175px] bg-slate-100 rounded-lg"
+        class="overflow-y-auto min-h-[5rem] max-h-[175px] bg-slate-100 rounded-lg"
       >
         <li :for={{dom_id, msg} <- @messages} id={dom_id}>
-          <span class="text-xs text-emerald-500"><%= msg.inserted_at %></span>
-          <span class="font-bold text-violet-500"><%= msg.user.name %></span>:
+          <span class="text-xs text-green-500"><%= msg.inserted_at %></span>
+          <span class="font-semibold text-violet-500"><%= msg.user.name %></span>:
           <span><%= msg.content %></span>
         </li>
       </ul>
@@ -77,7 +77,7 @@ defmodule GolfWeb.Components do
 
   def chat_form(assigns) do
     ~H"""
-    <form class="space-y-1" phx-submit={@submit}>
+    <form phx-submit={@submit} class="space-y-1">
       <.input
         id="chat-form-input"
         name="content"
@@ -92,7 +92,7 @@ defmodule GolfWeb.Components do
 
   def player_scores(assigns) do
     ~H"""
-    <table class="mt-1 min-w-[8rem]">
+    <table class="">
       <thead class="text-sm text-left">
         <tr>
           <th>User</th>

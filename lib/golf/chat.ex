@@ -17,5 +17,11 @@ defmodule Golf.Chat do
     )
     |> Repo.all()
     |> Repo.preload(:user)
+    |> Enum.map(fn msg -> Map.update!(msg, :inserted_at, &format_chat_time/1) end)
+  end
+
+  def format_chat_time(dt) do
+    # Calendar.strftime(dt, "%H:%m:%S")
+    Calendar.strftime(dt, "%y/%m/%d %H:%m:%S")
   end
 end

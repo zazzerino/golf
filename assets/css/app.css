@@ -8,4 +8,6 @@
   width: 600px;
   height: 600px;
   background-color: forestgreen;
+  /* transform: scale(90%); */
+  /* transform: scaleX(90%); */
 }

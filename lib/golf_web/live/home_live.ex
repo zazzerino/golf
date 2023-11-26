@@ -5,13 +5,14 @@ defmodule GolfWeb.HomeLive do
   # we need the id length as a constant in this module so we can use it in guards
   @id_length Golf.id_length()
 
+  # <h2 class="font-bold">Home</h2>
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="space-y-4">
-      <h2 class="font-bold">Home</h2>
+    <div class="mx-auto max-w-sm space-y-6">
+      <.header class="text-center">Home</.header>
 
-      <p :if={!@current_user}>
+      <p :if={!@current_user} class="text-center">
         <.register_link /> or <.login_link /> to play.
       </p>
 
@@ -26,13 +27,17 @@ defmodule GolfWeb.HomeLive do
 
   defp register_link(assigns) do
     ~H"""
-    <.link navigate={~p"/users/register"} class="text-blue-500 underline">Register</.link>
+    <.link navigate={~p"/users/register"} class="text-blue-500 font-semibold hover:underline">
+      Register
+    </.link>
     """
   end
 
   defp login_link(assigns) do
     ~H"""
-    <.link navigate={~p"/users/log_in"} class="text-blue-500 underline">Login</.link>
+    <.link navigate={~p"/users/log_in"} class="text-blue-500 font-semibold hover:underline">
+      Login
+    </.link>
     """
   end
 
