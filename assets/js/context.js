@@ -30,7 +30,6 @@ export class GameContext {
     this.stage = makeStage();
     this.renderer = makeRenderer();
     this.sprites = initSprites();
-    window.SPRITES = this.sprites;
 
     loadTextures().then(textures => {
       this.textures = textures;

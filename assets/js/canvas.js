@@ -97,25 +97,6 @@ export function makeHandSprites(textures, hand, pos) {
   hand.forEach((card, i) => {
     const name = card["face_up?"] ? card.name : DOWN_CARD;
     const coord = handCardCoord(pos, i);
-
-    switch (pos) {
-      case "bottom":
-        coord.y -= 30;
-        break;
-      
-      case "top":
-        coord.y += 30;
-        break;
-
-      case "left":
-        coord.x -= 5;
-        break;
-
-      case "right":
-        coord.x += 5;
-        break;
-    }
-
     const sprite = makeCardSprite(textures[name], coord.x, coord.y, coord.rotation);
     sprites.push(sprite);
   });
@@ -266,127 +247,127 @@ export function handCardCoord(pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) 
     switch (index) {
       case 0:
         x = CENTER_X - CARD_WIDTH - xPad;
-        y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3;
+        y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
         break;
 
       case 1:
         x = CENTER_X;
-        y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3;
+        y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
         break;
 
       case 2:
         x = CENTER_X + CARD_WIDTH + xPad;
-        y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3;
+        y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
         break;
 
       case 3:
         x = CENTER_X - CARD_WIDTH - xPad;
-        y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad;
+        y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad - 30;
         break;
 
       case 4:
         x = CENTER_X;
-        y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad;
+        y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad - 30;
         break;
 
       case 5:
         x = CENTER_X + CARD_WIDTH + xPad;
-        y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad;
+        y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad - 30;
         break;
     }
   } else if (pos === "top") {
     switch (index) {
       case 0:
         x = CENTER_X + CARD_WIDTH + xPad;
-        y = CARD_HEIGHT * 1.5 + yPad * 1.3;
+        y = CARD_HEIGHT * 1.5 + yPad * 1.3 + 30;
         break;
 
       case 1:
         x = CENTER_X;
-        y = CARD_HEIGHT * 1.5 + yPad * 1.3;
+        y = CARD_HEIGHT * 1.5 + yPad * 1.3 + 30;
         break;
 
       case 2:
         x = CENTER_X - CARD_WIDTH - xPad;
-        y = CARD_HEIGHT * 1.5 + yPad * 1.3;
+        y = CARD_HEIGHT * 1.5 + yPad * 1.3 + 30;
         break;
 
       case 3:
         x = CENTER_X + CARD_WIDTH + xPad;
-        y = CARD_HEIGHT / 2 + yPad;
+        y = CARD_HEIGHT / 2 + yPad + 30;
         break;
 
       case 4:
         x = CENTER_X;
-        y = CARD_HEIGHT / 2 + yPad;
+        y = CARD_HEIGHT / 2 + yPad + 30;
         break;
 
       case 5:
         x = CENTER_X - CARD_WIDTH - xPad;
-        y = CARD_HEIGHT / 2 + yPad;
+        y = CARD_HEIGHT / 2 + yPad + 30;
         break;
     }
   } else if (pos === "left") {
     switch (index) {
       case 0:
-        x = CARD_HEIGHT * 1.5 + yPad * 1.3;
+        x = CARD_HEIGHT * 1.5 + yPad * 1.3 - 5;
         y = CENTER_Y - CARD_WIDTH - xPad;
         break;
 
       case 1:
-        x = CARD_HEIGHT * 1.5 + yPad * 1.3;
+        x = CARD_HEIGHT * 1.5 + yPad * 1.3 - 5;
         y = CENTER_Y;
         break;
 
       case 2:
-        x = CARD_HEIGHT * 1.5 + yPad * 1.3;
+        x = CARD_HEIGHT * 1.5 + yPad * 1.3 - 5;
         y = CENTER_Y + CARD_WIDTH + xPad;
         break;
 
       case 3:
-        x = CARD_HEIGHT / 2 + yPad;
+        x = CARD_HEIGHT / 2 + yPad - 5;
         y = CENTER_Y - CARD_WIDTH - xPad;
         break;
 
       case 4:
-        x = CARD_HEIGHT / 2 + yPad;
+        x = CARD_HEIGHT / 2 + yPad - 5;
         y = CENTER_Y;
         break;
 
       case 5:
-        x = CARD_HEIGHT / 2 + yPad;
+        x = CARD_HEIGHT / 2 + yPad - 5;
         y = CENTER_Y + CARD_WIDTH + xPad;
         break;
     }
   } else if (pos === "right") {
     switch (index) {
       case 0:
-        x = GAME_WIDTH - CARD_HEIGHT * 1.5 - yPad * 1.3;
+        x = GAME_WIDTH - CARD_HEIGHT * 1.5 - yPad * 1.3 + 5;
         y = CENTER_Y + CARD_WIDTH + xPad;
         break;
 
       case 1:
-        x = GAME_WIDTH - CARD_HEIGHT * 1.5 - yPad * 1.3;
+        x = GAME_WIDTH - CARD_HEIGHT * 1.5 - yPad * 1.3 + 5;
         y = CENTER_Y;
         break;
 
       case 2:
-        x = GAME_WIDTH - CARD_HEIGHT * 1.5 - yPad * 1.3;
+        x = GAME_WIDTH - CARD_HEIGHT * 1.5 - yPad * 1.3 + 5;
         y = CENTER_Y - CARD_WIDTH - xPad;
         break;
 
       case 3:
-        x = GAME_WIDTH - CARD_HEIGHT / 2 - yPad;
+        x = GAME_WIDTH - CARD_HEIGHT / 2 - yPad + 5;
         y = CENTER_Y + CARD_WIDTH + xPad;
         break;
 
       case 4:
-        x = GAME_WIDTH - CARD_HEIGHT / 2 - yPad;
+        x = GAME_WIDTH - CARD_HEIGHT / 2 - yPad + 5;
         y = CENTER_Y;
         break;
 
       case 5:
-        x = GAME_WIDTH - CARD_HEIGHT / 2 - yPad;
+        x = GAME_WIDTH - CARD_HEIGHT / 2 - yPad + 5;
         y = CENTER_Y - CARD_WIDTH - xPad;
         break;
     }
