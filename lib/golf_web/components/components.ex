@@ -31,8 +31,15 @@ defmodule GolfWeb.Components do
     ~H"""
     <div class="w-1/2 mx-auto">
       <h4 class="font-semibold text-md">Settings</h4>
-      <form phx-submit={@submit} class="space-y-1">
-        <.input name="num-rounds" type="number" min="1" max="50" label="Number of rounds" value="1" />
+      <form phx-submit={@submit} phx-change={@change} class="space-y-1">
+        <.input
+          name="num-rounds"
+          type="number"
+          min="1"
+          max="50"
+          label="Number of rounds"
+          value={@num_rounds}
+        />
         <.button>Start Game</.button>
       </form>
     </div>
@@ -41,7 +48,7 @@ defmodule GolfWeb.Components do
 
   def chat(assigns) do
     ~H"""
-    <div class="flex-auto">
+    <div class="mt-auto">
       <.chat_messages messages={@messages} />
       <.chat_form submit={@submit} />
     </div>
@@ -55,7 +62,7 @@ defmodule GolfWeb.Components do
       <ul
         id="chat-messages"
         phx-update="stream"
-        class="overflow-y-auto min-h-[5rem] max-h-[175px] bg-slate-100 rounded-lg"
+        class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
       >
         <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
       </ul>
@@ -109,10 +116,10 @@ defmodule GolfWeb.Components do
 
   def game_stats(assigns) do
     ~H"""
-    <div class="">
+    <div class="w-full flex flex-col">
       <.round_stats_table
-        :for={{round, i} <- Enum.with_index(@stats.rounds, 1)}
-        num={i}
+        :for={round <- @stats.rounds}
+        num={round.num}
         turn={round.turn}
         state={round.state}
         players={round.players}
@@ -123,8 +130,8 @@ defmodule GolfWeb.Components do
 
   def round_stats_table(assigns) do
     ~H"""
-    <table class="table-auto w-3/5 border-separate text-center mx-auto">
-      <thead class="text-sm text-center font-semibold">
+    <table class="table-fixed border-separate border-spacing-1 border border-slate-200">
+      <thead class="text-sm text-left">
         <tr>
           <th>Round</th>
           <th>Turns</th>

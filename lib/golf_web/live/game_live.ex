@@ -14,7 +14,7 @@ defmodule GolfWeb.GameLive do
       <h1 class="leading-8 text-zinc-800 text-center">
         <div>
           <span class="text-lg font-bold">Game</span>
-          <span class="text-green-500 font-semibold"><%= @id %></span>
+          <span class="text-green-500 font-semibold copyable hover:cursor-pointer"><%= @id %></span>
         </div>
       </h1>
 
@@ -31,10 +31,9 @@ defmodule GolfWeb.GameLive do
           </.button>
         </div>
 
-        <.chat :if={@game} messages={@streams.chat_messages} submit="submit-chat" />
-
-        <div :if={@game}>
-          <.game_stats stats={Golf.Games.game_stats(@game)} />
+        <div :if={@game} class="flex flex-col w-[600px]">
+          <.game_stats stats={Games.game_stats(@game)} />
+          <.chat messages={@streams.chat_messages} submit="submit-chat" />
         </div>
       </div>
     </div>

@@ -39,6 +39,15 @@ hooks.GameCanvas = {
   }
 }
 
+const copyables = document.querySelectorAll(".copyable");
+
+copyables.forEach(el => {
+  el.addEventListener("click", ev => {
+    const content = ev.target.textContent;
+    navigator.clipboard.writeText(content);
+  });
+});
+
 window.addEventListener("phx:clear-chat-input", _ => {
   const inputEl = document.querySelector("#chat-form-input");
   inputEl.value = "";

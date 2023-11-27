@@ -34,10 +34,6 @@ defmodule GolfWeb.GamesLive do
     """
   end
 
-  # <thead class="font-semibold sticky top-0 bg-white">
-  # <td class="font-semibold text-green-500">
-  #   <%= game.id %>
-  # </td>
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -54,9 +50,4 @@ defmodule GolfWeb.GamesLive do
     games = Golf.GamesDb.get_user_games(socket.assigns.current_user.id)
     {:noreply, stream(socket, :games, games, at: 0)}
   end
-
-  # @impl true
-  # def handle_event("game_click", %{"id" => id}, socket) do
-  #   {:noreply, push_navigate(socket, to: ~p"/game/#{id}")}
-  # end
 end

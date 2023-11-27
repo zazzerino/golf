@@ -12,7 +12,7 @@ defmodule GolfWeb.LobbyLive do
       <h1 class="leading-8 text-zinc-800 text-center">
         <div>
           <span class="text-lg font-bold">Lobby</span>
-          <span class="text-green-500 font-semibold"><%= @id %></span>
+          <span class="text-green-500 font-semibold copyable hover:cursor-pointer"><%= @id %></span>
         </div>
       </h1>
 
@@ -20,7 +20,12 @@ defmodule GolfWeb.LobbyLive do
 
       <.chat messages={@streams.chat_messages} submit="submit-chat" />
 
-      <.opts_form :if={@host?} submit="start-game" />
+      <.opts_form
+        :if={@host?}
+        num_rounds={@num_rounds}
+        submit="start-game"
+        change="change-num-rounds"
+      />
 
       <p :if={@host? == false} class="text-center">
         Waiting for host to start game...
@@ -28,8 +33,6 @@ defmodule GolfWeb.LobbyLive do
     </div>
     """
   end
-
-  # <div :if={!@lobby} class="text-sm text-center">Loading...</div>
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -43,6 +46,7 @@ defmodule GolfWeb.LobbyLive do
        page_title: "Lobby",
        id: id,
        lobby: nil,
+       num_rounds: 1,
        host?: nil,
        can_join?: nil
      )
@@ -100,6 +104,11 @@ defmodule GolfWeb.LobbyLive do
   @impl true
   def handle_info({:game_created, game}, socket) do
     {:noreply, push_navigate(socket, to: ~p"/game/#{game.id}")}
+  end
+
+  @impl true
+  def handle_event("change-num-rounds", %{"num-rounds" => num_rounds}, socket) do
+    {:noreply, assign(socket, num_rounds: num_rounds)}
   end
 
   @impl true
