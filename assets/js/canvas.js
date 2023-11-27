@@ -132,11 +132,11 @@ export function makeHeldSprite(textures, card, pos, belongsToUser = true) {
 // text
 
 export const PLAYER_TURN_COLOR = "#00ff00";
-export const PLAYER_NOTURN_COLOR = "#ff77ff";
+export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
 
 export function makePlayerText(player) {
   const style = new PIXI.TextStyle({
-    fill: PLAYER_NOTURN_COLOR,
+    fill: NOT_PLAYER_TURN_COLOR,
     fontFamily: "monospace",
     // fontFamily: "Comic Sans MS",
   });
@@ -178,7 +178,7 @@ export function makePlayerText(player) {
 
 export function makeRoundText(roundNum) {
   const style = new PIXI.TextStyle({
-    fill: PLAYER_NOTURN_COLOR,
+    fill: NOT_PLAYER_TURN_COLOR,
     fontFamily: "monospace",
   });
 
@@ -191,7 +191,7 @@ export function makeRoundText(roundNum) {
 
 export function makeTurnText(turn) {
   const style = new PIXI.TextStyle({
-    fill: PLAYER_NOTURN_COLOR,
+    fill: NOT_PLAYER_TURN_COLOR,
     fontFamily: "monospace",
   });
 

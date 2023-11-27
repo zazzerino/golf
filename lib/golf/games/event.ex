@@ -22,6 +22,8 @@ defmodule Golf.Games.Event do
     |> validate_required([:round_id, :player_id, :action])
   end
 
+  def new(_game_or_round, _player, _action, _hand_index \\ nil)
+
   def new(%Game{rounds: [round | _]}, player, action, hand_index) do
     new(round, player, action, hand_index)
   end

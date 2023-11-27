@@ -4,17 +4,17 @@ defmodule Golf.LobbiesFixtures do
   entities via the `Golf.Lobbies` context.
   """
 
-  @doc """
-  Generate a lobby.
-  """
-  def lobby_fixture(attrs \\ %{}) do
-    {:ok, lobby} =
-      attrs
-      |> Enum.into(%{
-        id: "some id"
-      })
-      |> Golf.Lobbies.create_lobby()
+  # @doc """
+  # Generate a lobby.
+  # """
+  # def lobby_fixture(attrs \\ %{}) do
+  #   {:ok, lobby} =
+  #     attrs
+  #     |> Enum.into(%{
+  #       id: "some id"
+  #     })
+  #     |> Golf.Lobbies.create_lobby()
 
-    lobby
-  end
+  #   lobby
+  # end
 end

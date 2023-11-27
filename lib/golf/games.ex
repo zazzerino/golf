@@ -71,7 +71,8 @@ defmodule Golf.Games do
   end
 
   def can_act_round?(round, player, num_players) do
-    rem(round.turn, num_players) == player.turn
+    # :flip_2 is round.turn 0
+    rem(round.turn - 1, num_players) == player.turn
   end
 
   def round_changes(%Round{state: :flip_2} = round, %Event{action: :flip} = event) do
@@ -82,14 +83,14 @@ defmodule Golf.Games do
         &flip_card_at(&1, event.hand_index)
       )
 
-    state =
+    {state, turn} =
       if Enum.all?(hands, &min_two_face_up?/1) do
-        :take
+        {:take, round.turn + 1}
       else
-        :flip_2
+        {:flip_2, round.turn}
       end
 
-    %{state: state, hands: hands}
+    %{state: state, hands: hands, turn: turn}
   end
 
   def round_changes(%Round{state: :flip} = round, %Event{action: :flip} = event) do
@@ -146,6 +147,7 @@ defmodule Golf.Games do
         all_face_up?(hand) ->
           {:take, round.turn + 1, true}
 
+        # TODO
         one_face_down?(hand) ->
           {:take, round.turn + 1, false}
 

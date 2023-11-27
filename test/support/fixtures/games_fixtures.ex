@@ -4,15 +4,15 @@ defmodule Golf.GamesFixtures do
   entities via the `Golf.Games` context.
   """
 
-  @doc """
-  Generate a game.
-  """
-  def game_fixture(attrs \\ %{}) do
-    {:ok, game} =
-      attrs
-      |> Enum.into(%{})
-      |> Golf.Games.create_game()
+  # @doc """
+  # Generate a game.
+  # """
+  # def game_fixture(attrs \\ %{}) do
+  #   {:ok, game} =
+  #     attrs
+  #     |> Enum.into(%{})
+  #     |> Golf.Games.create_game()
 
-    game
-  end
+  #   game
+  # end
 end

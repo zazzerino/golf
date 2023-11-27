@@ -1,7 +1,7 @@
 import { 
   CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
-  PLAYER_TURN_COLOR, PLAYER_NOTURN_COLOR, makeRoundText, makeTurnText,
+  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText,
 } from "./canvas";
 
 import { 
@@ -51,7 +51,6 @@ export class GameContext {
   addSprites() {
     this.addRoundText();
     this.addTurnText();
-
     this.addDeck();
 
     if (this.game.state !== "no_round") {
@@ -72,13 +71,13 @@ export class GameContext {
 
   addDeck() {
     const sprite = makeDeckSprite(this.textures, this.game.state);
+    
+    this.sprites.deck = sprite;
+    this.stage.addChild(sprite);
 
     if (this.isPlayable("deck")) {
       makePlayable(sprite, () => this.onDeckClick());
     }
-
-    this.sprites.deck = sprite;
-    this.stage.addChild(sprite);
   }
 
   addTableCards() {
@@ -101,6 +100,7 @@ export class GameContext {
 
   addTableCard(card) {
     const sprite = makeTableSprite(this.textures, card);
+    
     this.sprites.table.unshift(sprite);
     this.stage.addChild(sprite);
   }
@@ -133,6 +133,7 @@ export class GameContext {
 
   addPlayerText(player) {
     const text = makePlayerText(player);
+    
     this.stage.addChild(text);
     this.sprites.players[player.position] = text;
 
@@ -144,7 +145,7 @@ export class GameContext {
   updatePlayerTexts() {
     for (const player of this.game.players) {
       const sprite = this.sprites.players[player.position];
-      const color = player.canAct ? PLAYER_TURN_COLOR : PLAYER_NOTURN_COLOR;
+      const color = player.canAct ? PLAYER_TURN_COLOR : NOT_PLAYER_TURN_COLOR;
       
       sprite.text = `${player.username}(${player.score}pts)`;
       sprite.style.fill = color;
@@ -340,7 +341,7 @@ export class GameContext {
       }
 
       // if the game is over, flip all the player's cards
-      if (this.game.state === "game_over") {
+      if (this.game.state === "game_over" || this.game.state == "round_over") {
         const name = player.hand[i].name;
         sprite.texture = this.textures[name];
       }
