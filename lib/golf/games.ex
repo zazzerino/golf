@@ -11,7 +11,7 @@ defmodule Golf.Games do
   def new_game(id, [host | _] = users, opts \\ Opts.default()) do
     players =
       Enum.with_index(users)
-      |> Enum.map(fn {user, i} -> %Player{user_id: user.id, turn: i} end)
+      |> Enum.map(fn {user, i} -> %Player{turn: i, user_id: user.id, user: user} end)
 
     %Game{
       id: id,
@@ -71,7 +71,7 @@ defmodule Golf.Games do
   end
 
   def can_act_round?(round, player, num_players) do
-    # :flip_2 is round.turn 0
+    # :flip_2 is turn 0, so the 1st player will move on round.turn - 1
     rem(round.turn - 1, num_players) == player.turn
   end
 
@@ -410,5 +410,41 @@ defmodule Golf.Games do
     with {:ok, [card], deck} <- deal_from(deck, 1) do
       {:ok, card, deck}
     end
+  end
+
+  def game_stats(game) do
+    game
+    |> Map.put(:state, current_state(game))
+    |> Map.update!(
+      :rounds,
+      fn rounds ->
+        rounds
+        |> Enum.map(&round_stats(&1, game.players))
+        |> Enum.reverse()
+      end
+    )
+  end
+
+  def round_stats(round, players) do
+    players =
+      put_scores(players, round.hands)
+      |> Enum.sort_by(& &1.score, :asc)
+
+    %{
+      id: round.id,
+      state: round.state,
+      turn: round.turn,
+      players: players
+    }
+  end
+
+  defp put_scores(players, []) do
+    Enum.map(players, fn p -> %{p | score: 0} end)
+  end
+
+  defp put_scores(players, hands) do
+    Enum.zip_with(players, hands, fn p, hand ->
+      %{p | score: score(hand)}
+    end)
   end
 end

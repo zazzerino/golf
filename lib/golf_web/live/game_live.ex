@@ -1,7 +1,7 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
-  import GolfWeb.Components, only: [chat: 1]
+  import GolfWeb.Components, only: [chat: 1, game_stats: 1]
 
   alias Golf.{Games, GamesDb, Chat}
   alias Golf.Games.{Player, Event}
@@ -18,10 +18,6 @@ defmodule GolfWeb.GameLive do
         </div>
       </h1>
 
-      <div :if={@game_over?} class="mt-[-20rem] font-semibold text-center">
-        Game Over
-      </div>
-
       <div class="space-y-1">
         <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
@@ -36,6 +32,10 @@ defmodule GolfWeb.GameLive do
         </div>
 
         <.chat :if={@game} messages={@streams.chat_messages} submit="submit-chat" />
+
+        <div :if={@game}>
+          <.game_stats stats={Golf.Games.game_stats(@game)} />
+        </div>
       </div>
     </div>
     """
@@ -55,6 +55,7 @@ defmodule GolfWeb.GameLive do
        game: nil,
        can_start_game?: nil,
        can_start_round?: nil,
+       round_over?: nil,
        game_over?: nil
      )
      |> stream(:chat_messages, [])}
@@ -81,6 +82,7 @@ defmodule GolfWeb.GameLive do
            game: game,
            can_start_game?: host? and data.state == :no_round,
            can_start_round?: host? and data.state == :round_over,
+           round_over?: data.state == :round_over,
            game_over?: data.state == :game_over
          )
          |> push_event("game-loaded", %{"game" => data})}
@@ -113,7 +115,7 @@ defmodule GolfWeb.GameLive do
     data = Data.from(game, socket.assigns.current_user)
 
     {:noreply,
-     assign(socket, game: game, can_start_round?: false)
+     assign(socket, game: game, can_start_round?: false, round_over?: false)
      |> push_event("round-started", %{"game" => data})}
   end
 
@@ -131,7 +133,7 @@ defmodule GolfWeb.GameLive do
     can_start_round? = socket.assigns.current_user.id == game.host_id
 
     {:noreply,
-     assign(socket, can_start_round?: can_start_round?)
+     assign(socket, can_start_round?: can_start_round?, round_over?: true)
      |> push_event("round-over", %{})}
   end
 

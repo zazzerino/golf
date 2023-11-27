@@ -21,6 +21,8 @@ defmodule Golf.GamesTest do
     refute Games.can_act?(game, p1)
     refute Games.can_act?(game, p2)
 
+    assert game == GamesDb.get_game(id)
+
     {:ok, game} = GamesDb.start_round(game)
 
     assert Games.current_state(game) == :flip_2
@@ -28,12 +30,16 @@ defmodule Golf.GamesTest do
     assert Games.can_act?(game, p1)
     assert Games.can_act?(game, p2)
 
+    assert game == GamesDb.get_game(id)
+
     event = Event.new(game, p1, :flip, 0)
     {:ok, game} = GamesDb.handle_event(game, event)
 
     assert Games.current_state(game) == :flip_2
     assert Games.can_act?(game, p1)
     assert Games.can_act?(game, p2)
+
+    assert game == GamesDb.get_game(id)
 
     event = Event.new(game, p2, :flip, 5)
     {:ok, game} = GamesDb.handle_event(game, event)
@@ -184,7 +190,7 @@ defmodule Golf.GamesTest do
 
     assert Games.current_round(game).flipped?
     assert Games.current_round(game).turn == 8
-    dbg(game)
+    # dbg(game)
   end
 end
 

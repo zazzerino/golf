@@ -4,12 +4,16 @@ defmodule Golf.Games.Game do
 
   @primary_key {:id, :string, []}
 
+  @states [:no_round, :flip_2, :take, :hold, :flip, :round_over, :game_over]
+
   schema "games" do
     belongs_to :host, Golf.Accounts.User
     has_one :opts, Golf.Games.Opts
     has_many :players, Golf.Games.Player
     has_many :rounds, Golf.Games.Round
     timestamps(type: :utc_datetime)
+
+    field :state, Ecto.Enum, values: @states, virtual: true
   end
 
   def changeset(game, attrs \\ %{}) do

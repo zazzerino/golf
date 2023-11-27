@@ -106,4 +106,53 @@ defmodule GolfWeb.Components do
     </table>
     """
   end
+
+  def game_stats(assigns) do
+    ~H"""
+    <div class="">
+      <.round_stats_table
+        :for={{round, i} <- Enum.with_index(@stats.rounds, 1)}
+        num={i}
+        turn={round.turn}
+        state={round.state}
+        players={round.players}
+      />
+    </div>
+    """
+  end
+
+  def round_stats_table(assigns) do
+    ~H"""
+    <table class="table-auto w-3/5 border-separate text-center mx-auto">
+      <thead class="text-sm text-center font-semibold">
+        <tr>
+          <th>Round</th>
+          <th>Turns</th>
+          <th>Scores</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><%= @num %></td>
+          <td><%= @turn %></td>
+          <td><.players_stats players={@players} /></td>
+        </tr>
+      </tbody>
+    </table>
+    """
+  end
+
+  def players_stats(assigns) do
+    ~H"""
+    <ol>
+      <.player_stats :for={p <- @players} name={p.user.name} score={p.score} />
+    </ol>
+    """
+  end
+
+  def player_stats(assigns) do
+    ~H"""
+    <li><%= "#{@name}: #{@score}" %></li>
+    """
+  end
 end

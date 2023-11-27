@@ -8,11 +8,12 @@ defmodule Golf.GamesDb do
   @events_query from(e in Event, order_by: [desc: :id])
   @players_query from(p in Player, order_by: p.turn)
   @player_turn_query from(p in Player, select: %{turn: p.turn})
+  @round_query from(r in Round, order_by: [desc: :id])
 
   @game_preloads [
     :opts,
     players: {@players_query, [:user]},
-    rounds: [events: {@events_query, [player: @player_turn_query]}]
+    rounds: {@round_query, [events: {@events_query, [player: @player_turn_query]}]}
   ]
 
   def get_game(id, preloads \\ @game_preloads) do
@@ -37,11 +38,8 @@ defmodule Golf.GamesDb do
   end
 
   defp format_game_time(game) do
-    Map.update!(game, :inserted_at, &format_game_dt/1)
-  end
-
-  defp format_game_dt(dt) do
-    Calendar.strftime(dt, "%y/%m/%d %H:%m:%S")
+    format = "%y/%m/%d %H:%m:%S"
+    Map.update!(game, :inserted_at, &Calendar.strftime(&1, format))
   end
 
   def create_game(id, users, opts \\ Opts.default()) do
@@ -95,6 +93,7 @@ defmodule Golf.GamesDb do
     Repo.transaction(fn ->
       {:ok, event} = insert_event(event)
       {:ok, round} = update_round(round, round_changes)
+      event = Map.update!(event, :player, &%{turn: &1.turn})
       %Round{round | events: [event | round.events]}
     end)
   end
