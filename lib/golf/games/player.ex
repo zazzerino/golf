@@ -3,7 +3,7 @@ defmodule Golf.Games.Player do
   import Ecto.Changeset
 
   @derive {Jason.Encoder,
-           only: [:id, :username, :turn, :position, :score, :hand, :heldCard, :canAct]}
+           only: [:id, :user_id, :username, :turn, :position, :score, :hand, :heldCard, :canAct]}
   schema "players" do
     belongs_to :game, Golf.Games.Game, type: :string
     belongs_to :user, Golf.Accounts.User

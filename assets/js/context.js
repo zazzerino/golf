@@ -9,6 +9,12 @@ import {
   tweenDeck, tweenTable, tweenTakeDeck, tweenTakeTable, tweenDiscard, tweenSwapTable 
 } from "./tweens";
 
+const HAND_SIZE = 6;
+
+function rotate(arr, n) {
+  return arr.slice(n).concat(arr.slice(0, n));
+}
+
 function initSprites() {
   return {
     deck: null,
@@ -176,31 +182,48 @@ export class GameContext {
     const roundSprite = this.sprites.round;
     roundSprite.text = `Round ${game.roundNum}`;
 
-    for (const player of this.game.players) {
+    let hands = [];
+
+    const hostIndex = this.game.players.findIndex(p => p.user_id === this.game.hostId);
+    if (hostIndex == null) throw new Error("host not found on game start");
+
+    const players = rotate(this.game.players, hostIndex);
+
+    for (let i = players.length-1; i >= 0; i--) {
+      const player = players[i];
       this.addHand(player);
 
       const playerSprite = this.sprites.players[player.position];
       playerSprite.style.fill = PLAYER_TURN_COLOR;
 
-      handTweens(player.position, this.sprites.hands[player.position])
-        .forEach((tween, i) => {
-          tween.start();
+      const tween = handTweens(player.position, this.sprites.hands[player.position]);
+      hands.push(tween);
+    };
 
-          // start tweening the deck after dealing the first row
-          if (i === 2) {
-            tween.onComplete(() => {
-              tweenDeck(this.sprites.deck)
-                .start()
-                .onComplete(() => {
-                  this.addTableCards();
+    [...hands].reverse().forEach((tweens, i) => {
+    // for (let i = hands.length-1; i >= 0; i--) {
+      // const tweens = hands[i];
+      [...tweens].reverse().forEach((tween, j) => {
+      // for (let j = tweens.length-1; j >= 0; j--) {
+      //   const tween = tweens[j];
+        
+        tween.delay((HAND_SIZE-1-j) * 150 + i * 1000)
+          .start();
 
-                  tweenTable(this.sprites.table[0])
-                    .start();
-                });
-            });
-          }
-        });
-    }
+        // start tweening the deck after dealing the first row
+        if (i === this.game.players.length-1 && j === 2) {
+          tween.onComplete(() => {
+            tweenDeck(this.sprites.deck)
+              .start()
+              .onComplete(() => {
+                this.addTableCards();
+                tweenTable(this.sprites.table[0])
+                  .start();
+              });
+          });
+        }
+      });
+    });
   }
 
   onRoundStart(game) {
@@ -340,7 +363,7 @@ export class GameContext {
       }
 
       // if the game is over, flip all the player's cards
-      if (this.game.state === "game_over" || this.game.state == "round_over") {
+      if (this.game.isFlipped || this.game.state === "game_over" || this.game.state == "round_over") {
         const name = player.hand[i].name;
         sprite.texture = this.textures[name];
       }

@@ -45,8 +45,7 @@ export function handTweens(pos, handSprites) {
 
     const tween = new Tween(sprite)
       .to({ x, y, rotation }, 800)
-      .easing(Easing.Cubic.InOut)
-      .delay((HAND_SIZE-1-i) * 150);
+      .easing(Easing.Cubic.InOut);
 
     tweens.push(tween);
   }

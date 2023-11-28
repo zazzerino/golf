@@ -2,6 +2,7 @@ defmodule Golf.Games.ClientData do
   @derive Jason.Encoder
   defstruct [
     :id,
+    :hostId,
     :turn,
     :state,
     :isFlipped,
@@ -39,6 +40,7 @@ defmodule Golf.Games.ClientData do
 
     %__MODULE__{
       id: game.id,
+      hostId: game.host_id,
       turn: (round && round.turn) || 0,
       state: Golf.Games.current_state(game),
       isFlipped: round && round.flipped?,
