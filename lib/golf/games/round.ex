@@ -6,6 +6,7 @@ defmodule Golf.Games.Round do
 
   schema "rounds" do
     belongs_to :game, Golf.Games.Game, type: :string
+    # belongs_to :player_out, Golf.Games.Player
 
     field :state, Ecto.Enum, values: @states
     field :flipped?, :boolean, default: false
@@ -15,13 +16,25 @@ defmodule Golf.Games.Round do
     field :hands, {:array, {:array, :map}}, default: []
     field :held_card, :map
 
+    field :player_out, :integer
+
     has_many :events, Golf.Games.Event
     timestamps(type: :utc_datetime)
   end
 
   def changeset(round, attrs \\ %{}) do
     round
-    |> cast(attrs, [:game_id, :state, :flipped?, :turn, :deck, :table_cards, :hands, :held_card])
+    |> cast(attrs, [
+      :game_id,
+      :state,
+      :flipped?,
+      :turn,
+      :deck,
+      :table_cards,
+      :hands,
+      :held_card,
+      :player_out
+    ])
     |> validate_required([:game_id, :state, :flipped?, :turn, :deck, :table_cards, :hands])
   end
 end

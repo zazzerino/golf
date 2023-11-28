@@ -123,6 +123,7 @@ defmodule GolfWeb.Components do
         turn={round.turn}
         state={round.state}
         players={round.players}
+        out_username={round.player_out_username}
       />
     </div>
     """
@@ -134,15 +135,17 @@ defmodule GolfWeb.Components do
       <thead class="text-sm text-left">
         <tr>
           <th>Round</th>
-          <th>Turns</th>
           <th>Scores</th>
+          <th>Turns</th>
+          <th>Player Out</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><%= @num %></td>
-          <td><%= @turn %></td>
           <td><.players_stats players={@players} /></td>
+          <td><%= @turn %></td>
+          <td><%= @out_username %></td>
         </tr>
       </tbody>
     </table>

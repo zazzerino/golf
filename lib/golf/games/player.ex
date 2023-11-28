@@ -7,16 +7,17 @@ defmodule Golf.Games.Player do
   schema "players" do
     belongs_to :game, Golf.Games.Game, type: :string
     belongs_to :user, Golf.Accounts.User
+
     field :turn, :integer
-    timestamps(type: :utc_datetime)
 
     field :username, :string, virtual: true
     field :position, :string, virtual: true
     field :score, :integer, virtual: true
-
     field :hand, {:array, :map}, virtual: true
     field :heldCard, :string, virtual: true
     field :canAct, :boolean, virtual: true
+
+    timestamps(type: :utc_datetime)
   end
 
   def changeset(player, attrs \\ %{}) do

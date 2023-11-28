@@ -201,12 +201,7 @@ export class GameContext {
     };
 
     [...hands].reverse().forEach((tweens, i) => {
-    // for (let i = hands.length-1; i >= 0; i--) {
-      // const tweens = hands[i];
       [...tweens].reverse().forEach((tween, j) => {
-      // for (let j = tweens.length-1; j >= 0; j--) {
-      //   const tween = tweens[j];
-        
         tween.delay((HAND_SIZE-1-j) * 150 + i * 1000)
           .start();
 

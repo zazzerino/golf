@@ -8,6 +8,31 @@ defmodule Golf.Games do
   @num_decks 2
   @hand_size 6
 
+  defp new_deck(1), do: @card_names
+
+  defp new_deck(n) when n > 1 do
+    @card_names ++ new_deck(n - 1)
+  end
+
+  defp deal_from([], _) do
+    {:error, :empty_deck}
+  end
+
+  defp deal_from(deck, n) when length(deck) < n do
+    {:error, :not_enough_cards}
+  end
+
+  defp deal_from(deck, n) do
+    {cards, deck} = Enum.split(deck, n)
+    {:ok, cards, deck}
+  end
+
+  defp deal_from(deck) do
+    with {:ok, [card], deck} <- deal_from(deck, 1) do
+      {:ok, card, deck}
+    end
+  end
+
   def new_game(id, [host | _] = users, opts \\ Opts.default()) do
     players =
       Enum.with_index(users)
@@ -103,19 +128,19 @@ defmodule Golf.Games do
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
-    {state, turn, flipped?} =
+    {state, turn, flipped?, player_out} =
       cond do
         Enum.all?(hands, &all_face_up?/1) ->
-          {:round_over, round.turn, true}
+          {:round_over, round.turn, true, round.player_out}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, true}
+          {:take, round.turn + 1, true, round.player_out || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.flipped?}
+          {:take, round.turn + 1, round.flipped?, round.player_out}
       end
 
-    %{state: state, turn: turn, hands: hands, flipped?: flipped?}
+    %{state: state, turn: turn, hands: hands, flipped?: flipped?, player_out: player_out}
   end
 
   def round_changes(%Round{state: :take} = round, %Event{action: :take_deck} = event) do
@@ -144,17 +169,17 @@ defmodule Golf.Games do
       ) do
     hand = Enum.at(round.hands, event.player.turn)
 
-    {state, turn, flipped?} =
+    {state, turn, flipped?, player_out} =
       cond do
-        all_face_up?(hand) ->
-          {:take, round.turn + 1, true}
+        # all_face_up?(hand) ->
+        #   {:take, round.turn + 1, true, round.player_out}
 
-        # TODO
+        # TODO handle player going out early
         one_face_down?(hand) ->
-          {:take, round.turn + 1, false}
+          {:take, round.turn + 1, false, round.player_out}
 
         true ->
-          {:flip, round.turn, false}
+          {:flip, round.turn, false, round.player_out}
       end
 
     %{
@@ -162,7 +187,8 @@ defmodule Golf.Games do
       turn: turn,
       held_card: nil,
       table_cards: [round.held_card["name"] | round.table_cards],
-      flipped?: flipped?
+      flipped?: flipped?,
+      player_out: player_out
     }
   end
 
@@ -200,16 +226,16 @@ defmodule Golf.Games do
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
-    {state, turn, flipped?} =
+    {state, turn, flipped?, player_out} =
       cond do
         Enum.all?(hands, &all_face_up?/1) ->
-          {:round_over, round.turn, true}
+          {:round_over, round.turn, true, round.player_out || event.player_id}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, true}
+          {:take, round.turn + 1, true, round.player_out || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.flipped?}
+          {:take, round.turn + 1, round.flipped?, round.player_out}
       end
 
     %{
@@ -218,7 +244,8 @@ defmodule Golf.Games do
       held_card: nil,
       hands: hands,
       table_cards: [card | round.table_cards],
-      flipped?: flipped?
+      flipped?: flipped?,
+      player_out: player_out
     }
   end
 
@@ -389,31 +416,6 @@ defmodule Golf.Games do
     |> Enum.map(fn {_, index} -> String.to_existing_atom("hand_#{index}") end)
   end
 
-  defp new_deck(1), do: @card_names
-
-  defp new_deck(n) when n > 1 do
-    @card_names ++ new_deck(n - 1)
-  end
-
-  defp deal_from([], _) do
-    {:error, :empty_deck}
-  end
-
-  defp deal_from(deck, n) when length(deck) < n do
-    {:error, :not_enough_cards}
-  end
-
-  defp deal_from(deck, n) do
-    {cards, deck} = Enum.split(deck, n)
-    {:ok, cards, deck}
-  end
-
-  defp deal_from(deck) do
-    with {:ok, [card], deck} <- deal_from(deck, 1) do
-      {:ok, card, deck}
-    end
-  end
-
   def game_stats(game) do
     game
     |> Map.put(:state, current_state(game))
@@ -429,12 +431,16 @@ defmodule Golf.Games do
       put_scores(players, round.hands)
       |> Enum.sort_by(& &1.score, :asc)
 
+    player_out = Enum.find(players, fn p -> p.id == round.player_out end)
+    username_out = player_out && player_out.user.name
+
     %{
       id: round.id,
       num: round_num,
       state: round.state,
       turn: round.turn,
-      players: players
+      players: players,
+      player_out_username: username_out
     }
   end
 

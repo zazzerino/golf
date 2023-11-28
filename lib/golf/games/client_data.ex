@@ -11,7 +11,8 @@ defmodule Golf.Games.ClientData do
     :players,
     :playerId,
     :playableCards,
-    :roundNum
+    :roundNum,
+    :playerOut
   ]
 
   def from(game, user) do
@@ -49,7 +50,8 @@ defmodule Golf.Games.ClientData do
       players: players,
       playerId: player && player.id,
       playableCards: playable_cards,
-      roundNum: length(game.rounds)
+      roundNum: length(game.rounds),
+      playerOut: round && round.player_out
     }
   end
 
