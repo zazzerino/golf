@@ -437,7 +437,7 @@ defmodule Golf.Games do
     players =
       players
       |> put_scores(round.hands)
-      |> Enum.sort_by(& &1.score, :asc)
+      # |> Enum.sort_by(& &1.score, :asc)
 
     players =
       if player_out_set?(round.state, players, player_out) do
@@ -445,6 +445,8 @@ defmodule Golf.Games do
       else
         players
       end
+
+    players = Enum.sort_by(players, & &1.score)
 
     %{
       id: round.id,

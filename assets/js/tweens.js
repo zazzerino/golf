@@ -1,4 +1,4 @@
-import { Tween, Easing, update } from "@tweenjs/tween.js";
+import { Tween, Easing, update } from "../vendor/tween.esm.min.js";
 import { CENTER_X, DECK_X, DECK_Y, TABLE_CARD_X, TABLE_CARD_Y, rotationAt } from "./canvas";
 
 const HAND_SIZE = 6;

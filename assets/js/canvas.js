@@ -1,5 +1,5 @@
-import * as PIXI from "pixi.js";
-import { OutlineFilter } from "@pixi/filter-outline";
+// import * as PIXI from "../vendor/pixi.min.mjs";
+import { OutlineFilter } from "../vendor/pixi-filters.mjs";
 
 const CARD_IMG_WIDTH = 88;
 const CARD_IMG_HEIGHT = 124;

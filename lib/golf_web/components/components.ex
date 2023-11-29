@@ -20,7 +20,6 @@ defmodule GolfWeb.Components do
           <span class="text-blue-500 font-semibold">
             <%= user.name %>
           </span>
-          <span class="text-xs">(id=<%= user.id %>)</span>
         </li>
       </ol>
     </div>
@@ -137,7 +136,7 @@ defmodule GolfWeb.Components do
           <th>Round</th>
           <th>Scores</th>
           <th>Turns</th>
-          <th>Player Out</th>
+          <th>1st Out</th>
         </tr>
       </thead>
       <tbody>

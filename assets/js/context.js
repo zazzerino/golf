@@ -39,7 +39,11 @@ export class GameContext {
 
     loadTextures().then(textures => {
       this.textures = textures;
+
+      // Clear prev children. Otherwise, when the websocket conn is dropped and reconnected it will draw the canvas twice.
+      this.parentEl.replaceChildren();
       this.parentEl.appendChild(this.renderer.view);
+
       this.addSprites();
       requestAnimationFrame(time => this.draw(time));
     });

@@ -98,7 +98,7 @@ defmodule GolfWeb.LobbyLive do
      socket
      |> assign(lobby: lobby, can_join?: can_join?)
      |> stream_insert(:users, new_user)
-     |> put_flash(:info, "User joined: #{new_user.name}(id=#{new_user.id})")}
+     |> put_flash(:info, "User joined: #{new_user.name}")}
   end
 
   @impl true
