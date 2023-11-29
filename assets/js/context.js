@@ -358,7 +358,7 @@ export class GameContext {
       }
 
       // if the game is over, flip all the player's cards
-      if (this.game.isFlipped || this.game.state === "game_over" || this.game.state == "round_over") {
+      if (this.game.playerOut) {
         const name = player.hand[i].name;
         sprite.texture = this.textures[name];
       }
@@ -396,7 +396,7 @@ export class GameContext {
     this.sprites.held = null;
 
     // if this is the last round, flip all the player's cards
-    if (this.game.isFlipped) {
+    if (this.game.playerOut) {
       handSprites.forEach((sprite, i) => {
         const card = player.hand[i].name;
         sprite.texture = this.textures[card];

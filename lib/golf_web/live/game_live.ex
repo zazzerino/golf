@@ -18,7 +18,7 @@ defmodule GolfWeb.GameLive do
         </div>
       </h1>
 
-      <div class="space-y-1">
+      <div class="space-y-2">
         <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
         <div>
@@ -30,6 +30,8 @@ defmodule GolfWeb.GameLive do
             Start Round
           </.button>
         </div>
+
+        <div :if={@game_over?} class="font-semibold text-center text-lg py-2">Game Over</div>
 
         <div :if={@game} class="flex flex-col w-[600px]">
           <.game_stats stats={Games.game_stats(@game)} />

@@ -39,6 +39,24 @@ defmodule Golf.Games.ClientData do
       |> Enum.zip_with(positions, &put_position/2)
       |> Enum.map(&put_player_data(&1, game, held_card))
 
+    out_index = if round, do: Enum.find_index(players, fn p -> p.id == round.player_out end)
+
+    player_out =
+      if out_index do
+        Enum.at(players, out_index)
+        |> Map.put(
+          :score,
+          Enum.at(maybe_rotate(round.hands, index), out_index) |> Golf.Games.score()
+        )
+      end
+
+    players =
+      if round && player_out && Golf.Games.player_out_set?(round.state, players, player_out) do
+        Enum.map(players, fn p -> Golf.Games.double_score_if(p, p.id == player_out.id) end)
+      else
+        players
+      end
+
     %__MODULE__{
       id: game.id,
       hostId: game.host_id,

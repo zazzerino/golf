@@ -427,12 +427,24 @@ defmodule Golf.Games do
   end
 
   defp round_stats(round, round_num, players) do
+    out_index = Enum.find_index(players, fn p -> p.id == round.player_out end)
+
+    player_out = if out_index do
+      Enum.at(players, out_index)
+      |> Map.put(:score, Enum.at(round.hands, out_index) |> score())
+    end
+
     players =
-      put_scores(players, round.hands)
+      players
+      |> put_scores(round.hands)
       |> Enum.sort_by(& &1.score, :asc)
 
-    player_out = Enum.find(players, fn p -> p.id == round.player_out end)
-    username_out = player_out && player_out.user.name
+    players =
+      if player_out_set?(round.state, players, player_out) do
+        Enum.map(players, fn p -> double_score_if(p, p.id == player_out.id) end)
+      else
+        players
+      end
 
     %{
       id: round.id,
@@ -440,9 +452,21 @@ defmodule Golf.Games do
       state: round.state,
       turn: round.turn,
       players: players,
-      player_out_username: username_out
+      player_out_username: player_out && player_out.user.name
     }
   end
+
+  def player_out_set?(round_state, players, player_out) do
+    round_state == :round_over
+      && player_out
+      && Enum.any?(players, & &1.score < player_out.score)
+  end
+
+  def double_score_if(player, true) do
+    Map.update!(player, :score, fn n -> n * 2 end)
+  end
+
+  def double_score_if(player, _), do: player
 
   defp put_scores(players, []) do
     Enum.map(players, &Map.put(&1, :score, 0))
