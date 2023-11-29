@@ -56,7 +56,9 @@ export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroun
     width,
     height,
     backgroundColor,
-    antialias: true,
+    // antialias: true,
+    resolution: window.devicePixelRatio || 1,
+    autoDensity: true,
   });
 
   renderer.events.cursorStyles.hover = HOVER_CURSOR_STYLE;
@@ -218,7 +220,7 @@ export function heldCardCoord(pos, yPad = HAND_Y_PAD) {
   switch (pos) {
     case "bottom":
       x = CENTER_X + CARD_WIDTH * 2.5;
-      y = GAME_HEIGHT - CARD_HEIGHT - yPad;
+      y = GAME_HEIGHT - CARD_HEIGHT - yPad - 30;
       break;
 
     case "top":

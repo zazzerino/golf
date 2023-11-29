@@ -12,7 +12,9 @@ defmodule GolfWeb.LobbyLive do
       <h1 class="leading-8 text-zinc-800 text-center">
         <div>
           <span class="text-lg font-bold">Lobby</span>
-          <span class="text-green-500 font-semibold copyable hover:cursor-pointer"><%= @id %></span>
+          <span class="text-green-500 font-semibold copyable hover:cursor-pointer hover:underline">
+            <%= @id %>
+          </span>
         </div>
       </h1>
 

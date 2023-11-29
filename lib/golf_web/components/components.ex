@@ -35,9 +35,11 @@ defmodule GolfWeb.Components do
           name="num-rounds"
           type="number"
           min="1"
-          max="50"
+          max="32"
           label="Number of rounds"
+          pattern="\d*"
           value={@num_rounds}
+          required
         />
         <.button>Start Game</.button>
       </form>
@@ -74,7 +76,7 @@ defmodule GolfWeb.Components do
     <li id={@id} class="text-left">
       <span class="text-xs text-green-500"><%= @msg.inserted_at %></span>
       <span class="font-semibold text-violet-500"><%= @msg.user.name %></span>:
-      <span><%= @msg.content %></span>
+      <span class="text-sm"><%= @msg.content %></span>
     </li>
     """
   end
@@ -115,7 +117,7 @@ defmodule GolfWeb.Components do
 
   def game_stats(assigns) do
     ~H"""
-    <div class="w-full flex flex-col">
+    <div class="flex flex-col">
       <.round_stats_table
         :for={round <- @stats.rounds}
         num={round.num}

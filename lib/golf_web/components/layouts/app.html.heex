@@ -26,9 +26,8 @@
   </div>
 </header>
 -->
-
-<header>
-  <ul class="w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end bg-slate-50">
+<nav class="">
+  <ul class="z-10 border-b flex items-center gap-4 px-1 md:px-2 lg:px-4 justify-end bg-slate-50">
     <%= if @current_user do %>
       <li class="mr-auto text-[0.8125rem] leading-6 text-zinc-900">
         Logged in as:
@@ -90,11 +89,12 @@
       </li>
     <% end %>
   </ul>
-</header>
- 
-
+</nav>
+<!--
 <main class="px-4 py-4 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
+-->
+<main class="px-1 py-0">
+  <div class="mx-auto w-full">
     <.flash_group flash={@flash} />
     <%= @inner_content %>
   </div>

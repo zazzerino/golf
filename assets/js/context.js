@@ -206,8 +206,12 @@ export class GameContext {
       hands.push(tween);
     };
 
-    [...hands].reverse().forEach((tweens, i) => {
-      [...tweens].reverse().forEach((tween, j) => {
+    hands.reverse();
+
+    hands.forEach((tweens, i) => {
+      tweens.reverse();
+
+      tweens.forEach((tween, j) => {
         tween.delay((HAND_SIZE-1-j) * 150 + i * 1000)
           .start();
 
@@ -218,6 +222,7 @@ export class GameContext {
               .start()
               .onComplete(() => {
                 this.addTableCards();
+
                 tweenTable(this.sprites.table[0])
                   .start();
               });

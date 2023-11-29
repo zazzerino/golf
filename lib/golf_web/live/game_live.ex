@@ -7,36 +7,39 @@ defmodule GolfWeb.GameLive do
   alias Golf.Games.{Player, Event}
   alias Golf.Games.ClientData, as: Data
 
+  # <div class="mx-auto space-y-1 w-[510px] md:w-[600px]">
+  # <div id="game-canvas" class="my-0 origin-top-left scale-[85%] md:scale-100" phx-hook="GameCanvas" phx-update="ignore"></div>
+
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-[600px] space-y-1">
+    <div class="mx-auto w-[480px] sm:w-[600px]">
       <h1 class="text-zinc-800 text-center">
         <div>
           <span class="text-lg font-bold">Game</span>
-          <span class="text-green-500 font-semibold copyable hover:cursor-pointer"><%= @id %></span>
+          <span class="text-green-500 font-semibold copyable hover:cursor-pointer hover:underline"><%= @id %></span>
         </div>
       </h1>
 
-      <div class="space-y-2">
+      <div class="origin-top-left scale-x-[80%] scale-y-[80%] sm:scale-x-100 sm:scale-y-100">
         <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
+      </div>
 
-        <div>
-          <.button :if={@can_start_game?} phx-click="start-game">
-            Start Game
-          </.button>
+      <div class="mt-[-7rem] sm:mt-1">
+        <.button :if={@can_start_game?} phx-click="start-game">
+          Start Game
+        </.button>
 
-          <.button :if={@can_start_round?} phx-click="start-round">
-            Start Round
-          </.button>
-        </div>
+        <.button :if={@can_start_round?} phx-click="start-round">
+          Start Round
+        </.button>
+      </div>
 
-        <div :if={@game_over?} class="font-semibold text-center text-lg py-2">Game Over</div>
+      <div :if={@game_over?} class="font-semibold text-center text-lg py-2">Game Over</div>
 
-        <div :if={@game} class="flex flex-col w-[600px]">
-          <.game_stats stats={Games.game_stats(@game)} />
-          <.chat messages={@streams.chat_messages} submit="submit-chat" />
-        </div>
+      <div :if={@game} class="flex flex-col">
+        <.game_stats stats={Games.game_stats(@game)} />
+        <.chat messages={@streams.chat_messages} submit="submit-chat" />
       </div>
     </div>
     """
