@@ -155,8 +155,10 @@ export class GameContext {
     for (const player of this.game.players) {
       const sprite = this.sprites.players[player.position];
       const color = player.canAct ? PLAYER_TURN_COLOR : NOT_PLAYER_TURN_COLOR;
+
+      const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
       
-      sprite.text = `${player.username}(${player.score}pts)`;
+      sprite.text = `${player.username}(${player.score}${points})`;
       sprite.style.fill = color;
     }
   }

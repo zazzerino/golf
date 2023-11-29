@@ -11,3 +11,7 @@
   /* transform: scale(90%); */
   /* transform: scaleX(90%); */
 }
+
+#game-canvas canvas {
+  touch-action: auto !important;
+}

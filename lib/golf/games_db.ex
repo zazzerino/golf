@@ -31,6 +31,7 @@ defmodule Golf.GamesDb do
       where: [user_id: ^user_id],
       join: g in Game,
       on: [id: p.game_id],
+      order_by: g.inserted_at,
       select: g
     )
     |> Repo.all()

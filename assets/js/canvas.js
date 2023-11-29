@@ -15,10 +15,10 @@ const GAME_HEIGHT = 600;
 export const CENTER_X = GAME_WIDTH / 2;
 export const CENTER_Y = GAME_HEIGHT / 2;
 
-export const DECK_X = CENTER_X - CARD_WIDTH / 2;
+export const DECK_X = CENTER_X - CARD_WIDTH / 2 - 4;
 export const DECK_Y = CENTER_Y;
 
-export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + 2;
+export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + 4;
 export const TABLE_CARD_Y = CENTER_Y;
 
 const HAND_X_PAD = 3;
@@ -122,7 +122,9 @@ export function makePlayerText(player) {
     // fontFamily: "Comic Sans MS",
   });
 
-  const content = `${player.username}(${player.score}pts)`;
+  const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
+
+  const content = `${player.username}(${player.score}${points})`;
   const text = new PIXI.Text(content, style);
 
   switch (player.position) {
@@ -186,7 +188,8 @@ export function makeTurnText(turn) {
 
 // interactive
 
-const PLAYABLE_FILTER = new OutlineFilter(2, 0xff00ff, 1.0);
+// const PLAYABLE_FILTER = new OutlineFilter(2, 0xff00ff, 1.0);
+const PLAYABLE_FILTER = new OutlineFilter(3, 0x00ffff, 0.5);
 
 export function makePlayable(sprite, callback) {
   sprite.eventMode = "static";

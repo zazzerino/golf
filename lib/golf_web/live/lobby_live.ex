@@ -125,7 +125,7 @@ defmodule GolfWeb.LobbyLive do
     id = socket.assigns.id
 
     # unless Golf.GamesDb.game_exists?(id) do
-    unless socket.assigns.game_exists? == true do
+    unless socket.assigns.game_exists? do
       {num_rounds, _} = Integer.parse(num_rounds)
       opts = %Opts{num_rounds: num_rounds}
       {:ok, game} = Golf.GamesDb.create_game(id, socket.assigns.lobby.users, opts)
