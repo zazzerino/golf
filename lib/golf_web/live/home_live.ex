@@ -65,10 +65,14 @@ defmodule GolfWeb.HomeLive do
         {:noreply, put_flash(socket, :error, "Game #{id} not found.")}
 
       lobby ->
-        user = socket.assigns.current_user
-        {:ok, lobby} = Golf.Lobbies.add_lobby_user(lobby, user)
-        :ok = Golf.broadcast("lobby:#{id}", {:user_joined, lobby, user})
-        {:noreply, push_navigate(socket, to: ~p"/lobby/#{id}")}
+        unless Golf.GamesDb.game_exists?(id) do
+          user = socket.assigns.current_user
+          {:ok, lobby} = Golf.Lobbies.add_lobby_user(lobby, user)
+          :ok = Golf.broadcast("lobby:#{id}", {:user_joined, lobby, user})
+          {:noreply, push_navigate(socket, to: ~p"/lobby/#{id}")}
+        else
+          {:noreply, put_flash(socket, :error, "Game #{id} already started.")}
+        end
     end
   end
 end

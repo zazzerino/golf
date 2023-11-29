@@ -10,8 +10,8 @@ defmodule GolfWeb.GameLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-[600px] space-y-4">
-      <h1 class="leading-8 text-zinc-800 text-center">
+    <div class="mx-auto max-w-[600px] space-y-1">
+      <h1 class="text-zinc-800 text-center">
         <div>
           <span class="text-lg font-bold">Game</span>
           <span class="text-green-500 font-semibold copyable hover:cursor-pointer"><%= @id %></span>

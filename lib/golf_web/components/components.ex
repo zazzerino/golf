@@ -161,7 +161,7 @@ defmodule GolfWeb.Components do
 
   def player_stats(assigns) do
     ~H"""
-    <li><%= "#{@name}: #{@score}" %></li>
+    <li><span class="text-blue-500 font-semibold"><%= @name %></span>: <%= @score %></li>
     """
   end
 end

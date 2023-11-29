@@ -21,13 +21,15 @@ defmodule GolfWeb.LobbyLive do
       <.chat messages={@streams.chat_messages} submit="submit-chat" />
 
       <.opts_form
-        :if={@host?}
+        :if={@host? && !@game_exists?}
         num_rounds={@num_rounds}
         submit="start-game"
         change="change-num-rounds"
       />
 
-      <p :if={@host? == false} class="text-center">
+      <.button :if={@game_exists?} phx-click="goto-game">Go To Game</.button>
+
+      <p :if={@host? == false && !@game_exists?} class="text-center">
         Waiting for host to start game...
       </p>
     </div>
@@ -38,6 +40,7 @@ defmodule GolfWeb.LobbyLive do
   def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
       send(self(), {:load_lobby, id})
+      send(self(), {:load_game_exists?, id})
       send(self(), {:load_chat_messages, id})
     end
 
@@ -48,7 +51,8 @@ defmodule GolfWeb.LobbyLive do
        lobby: nil,
        num_rounds: 1,
        host?: nil,
-       can_join?: nil
+       can_join?: nil,
+       game_exists?: nil
      )
      |> stream(:users, [])
      |> stream(:chat_messages, [])}
@@ -71,6 +75,11 @@ defmodule GolfWeb.LobbyLive do
          assign(socket, lobby: lobby, host?: host?)
          |> stream(:users, lobby.users)}
     end
+  end
+
+  @impl true
+  def handle_info({:load_game_exists?, id}, socket) do
+    {:noreply, assign(socket, game_exists?: Golf.GamesDb.game_exists?(id))}
   end
 
   @impl true
@@ -115,7 +124,8 @@ defmodule GolfWeb.LobbyLive do
   def handle_event("start-game", %{"num-rounds" => num_rounds}, socket) do
     id = socket.assigns.id
 
-    unless Golf.GamesDb.game_exists?(id) do
+    # unless Golf.GamesDb.game_exists?(id) do
+    unless socket.assigns.game_exists? == true do
       {num_rounds, _} = Integer.parse(num_rounds)
       opts = %Opts{num_rounds: num_rounds}
       {:ok, game} = Golf.GamesDb.create_game(id, socket.assigns.lobby.users, opts)
@@ -123,6 +133,11 @@ defmodule GolfWeb.LobbyLive do
     end
 
     {:noreply, push_navigate(socket, to: ~p"/game/#{id}")}
+  end
+
+  @impl true
+  def handle_event("goto-game", _, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/game/#{socket.assigns.id}")}
   end
 
   @impl true
