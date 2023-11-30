@@ -4,7 +4,7 @@ defmodule GolfWeb.GamesLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-xs space-y-6">
+    <div class="mx-auto max-w-md space-y-6">
       <.header class="text-center">Games</.header>
 
       <div class="overflow-y-auto max-h-[600px]">

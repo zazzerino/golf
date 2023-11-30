@@ -9,7 +9,7 @@ defmodule GolfWeb.UserSettingsLive do
       Account Settings
     </.header>
 
-    <div class="space-y-12 divide-y">
+    <div class="space-y-12 divide-y max-w-md mx-auto">
       <div>
         <.simple_form
           for={@name_form}

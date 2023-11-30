@@ -72,6 +72,7 @@ export function makeStage() {
 // sprites
 
 function makeCardSprite(texture, x = 0, y = 0, rotation = 0) {
+  // texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   const sprite = PIXI.Sprite.from(texture);
 
   sprite.scale.set(CARD_SCALE, CARD_SCALE);
