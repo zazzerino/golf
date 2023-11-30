@@ -369,7 +369,7 @@ export class GameContext {
       }
 
       // if the game is over, flip all the player's cards
-      if (this.game.playerOut) {
+      if (this.game.isFlipped) {
         const name = player.hand[i].name;
         sprite.texture = this.textures[name];
       }
@@ -407,7 +407,7 @@ export class GameContext {
     this.sprites.held = null;
 
     // if this is the last round, flip all the player's cards
-    if (this.game.playerOut) {
+    if (this.game.isFlipped) {
       handSprites.forEach((sprite, i) => {
         const card = player.hand[i].name;
         sprite.texture = this.textures[card];

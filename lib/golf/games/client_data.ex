@@ -12,7 +12,7 @@ defmodule Golf.Games.ClientData do
     :playerId,
     :playableCards,
     :roundNum,
-    :playerOut
+    :firstPlayerId
   ]
 
   def from(game, user) do
@@ -39,7 +39,7 @@ defmodule Golf.Games.ClientData do
       |> Enum.zip_with(positions, &put_position/2)
       |> Enum.map(&put_player_data(&1, game, held_card))
 
-    out_index = if round, do: Enum.find_index(players, fn p -> p.id == round.player_out end)
+    out_index = if round, do: Enum.find_index(players, fn p -> p.id == round.player_out_id end)
 
     player_out =
       if out_index do
@@ -51,7 +51,7 @@ defmodule Golf.Games.ClientData do
       end
 
     players =
-      if round && round.player_out && Golf.Games.player_set?(round, game.players, round.player_out) do
+      if round && round.player_out && Golf.Games.player_set?(round, game.players, round.player_out_id) do
         Enum.map(players, fn p -> Golf.Games.double_score_if(p, p.id == player_out.id) end)
       else
         players
@@ -62,14 +62,14 @@ defmodule Golf.Games.ClientData do
       hostId: game.host_id,
       turn: (round && round.turn) || 0,
       state: Golf.Games.current_state(game),
-      isFlipped: round && round.player_out,
+      isFlipped: round && round.player_out_id,
       deck: (round && round.deck) || [],
       tableCards: (round && round.table_cards) || [],
       players: players,
       playerId: player && player.id,
       playableCards: playable_cards,
       roundNum: length(game.rounds),
-      playerOut: round && round.player_out
+      firstPlayerId: round && round.first_player_id
     }
   end
 

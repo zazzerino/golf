@@ -11,7 +11,6 @@ defmodule Golf.Games.Game do
     has_many :players, Golf.Games.Player
     has_many :rounds, Golf.Games.Round
     has_one :opts, Golf.Games.Opts
-    has_one :player_out, Golf.Games.Player
 
     field :state, Ecto.Enum, values: @states, virtual: true
 

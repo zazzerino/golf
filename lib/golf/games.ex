@@ -61,6 +61,17 @@ defmodule Golf.Games do
       |> Enum.map(&%{"name" => &1, "face_up?" => false})
       |> Enum.chunk_every(@hand_size)
 
+    first_player_id =
+      case game.rounds do
+        [] ->
+          List.first(game.players).id
+
+        [round | _] ->
+          last_index = Enum.find_index(game.players, & &1.id == round.first_player_id)
+          index = rem(last_index + 1, length(game.players))
+          Enum.at(game.players, index).id
+      end
+
     %Round{
       game_id: game.id,
       state: :flip_2,
@@ -68,7 +79,8 @@ defmodule Golf.Games do
       deck: deck,
       hands: hands,
       table_cards: [table_card],
-      events: []
+      events: [],
+      first_player_id: first_player_id
     }
   end
 
@@ -128,19 +140,19 @@ defmodule Golf.Games do
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
-    {state, turn, player_out} =
+    {state, turn, player_out_id} =
       cond do
         Enum.all?(hands, &all_face_up?/1) ->
-          {:round_over, round.turn, round.player_out}
+          {:round_over, round.turn, round.player_out_id}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, round.player_out || event.player_id}
+          {:take, round.turn + 1, round.player_out_id || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.player_out}
+          {:take, round.turn + 1, round.player_out_id}
       end
 
-    %{state: state, turn: turn, hands: hands, player_out: player_out}
+    %{state: state, turn: turn, hands: hands, player_out_id: player_out_id}
   end
 
   def round_changes(%Round{state: :take} = round, %Event{action: :take_deck} = event) do
@@ -166,7 +178,7 @@ defmodule Golf.Games do
   def round_changes(
         %Round{state: :hold} = round,
         %Event{action: :discard} = event
-      ) when is_integer(round.player_out) do
+      ) when is_integer(round.player_out_id) do
     hands = List.update_at(round.hands, event.player.turn, &flip_all/1)
 
     {state, turn} =
@@ -188,20 +200,17 @@ defmodule Golf.Games do
   def round_changes(
         %Round{state: :hold} = round,
         %Event{action: :discard} = event
-      ) when is_nil(round.player_out) do
+      ) when is_nil(round.player_out_id) do
     hand = Enum.at(round.hands, event.player.turn)
 
-    {state, turn, player_out} =
+    {state, turn, player_out_id} =
       cond do
-        # all_face_up?(hand) ->
-        #   {:take, round.turn + 1, true, round.player_out}
-
         # TODO handle player going out early
         one_face_down?(hand) ->
-          {:take, round.turn + 1, round.player_out}
+          {:take, round.turn + 1, round.player_out_id}
 
         true ->
-          {:flip, round.turn, round.player_out}
+          {:flip, round.turn, round.player_out_id}
       end
 
     %{
@@ -209,7 +218,7 @@ defmodule Golf.Games do
       turn: turn,
       held_card: nil,
       table_cards: [round.held_card["name"] | round.table_cards],
-      player_out: player_out
+      player_out_id: player_out_id
     }
   end
 
@@ -220,21 +229,21 @@ defmodule Golf.Games do
     {hand, card} =
       round.hands
       |> Enum.at(event.player.turn)
-      |> flip_all_if(is_integer(round.player_out))
+      |> flip_all_if(is_integer(round.player_out_id))
       |> swap_card(event.hand_index, round.held_card["name"])
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
-    {state, turn, player_out} =
+    {state, turn, player_out_id} =
       cond do
         Enum.all?(hands, &all_face_up?/1) ->
-          {:round_over, round.turn, round.player_out || event.player_id}
+          {:round_over, round.turn, round.player_out_id || event.player_id}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, round.player_out || event.player_id}
+          {:take, round.turn + 1, round.player_out_id || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.player_out}
+          {:take, round.turn + 1, round.player_out_id}
       end
 
     %{
@@ -243,7 +252,7 @@ defmodule Golf.Games do
       held_card: nil,
       hands: hands,
       table_cards: [card | round.table_cards],
-      player_out: player_out
+      player_out_id: player_out_id
     }
   end
 
@@ -260,7 +269,7 @@ defmodule Golf.Games do
   def playable_cards(round, player, num_players) do
     if can_act_round?(round, player, num_players) do
       hand = Enum.at(round.hands, player.turn)
-      card_places(round.state, is_integer(round.player_out), hand)
+      card_places(round.state, is_integer(round.player_out_id), hand)
     else
       []
     end
@@ -449,8 +458,21 @@ defmodule Golf.Games do
     end)
   end
 
+  # def round_player_score(round, players, player_id) do
+  #   index = Enum.find_index(players, & &1.id == player_id)
+
+  #   hand = Enum.at(round.hands, index)
+
+  #   score =
+  #     if player_set?(round, players, player_id) do
+  #       score(hand) * 2
+  #     else
+  #       score(hand)
+  #     end
+  # end
+
   def player_set?(round, players, player_id) do
-    if round.state == :round_over and round.player_out == player_id do
+    if round.state == :round_over and round.player_out_id == player_id do
       index = Enum.find_index(players, & &1.id == player_id)
       any_lower_score?(round.hands, index)
     else
@@ -459,7 +481,7 @@ defmodule Golf.Games do
   end
 
   defp round_stats(round, round_num, players) do
-    out_index = Enum.find_index(players, fn p -> p.id == round.player_out end)
+    out_index = Enum.find_index(players, & &1.id == round.player_out_id)
 
     player_out = if out_index do
       Enum.at(players, out_index)

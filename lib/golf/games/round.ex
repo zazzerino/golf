@@ -5,8 +5,6 @@ defmodule Golf.Games.Round do
   @states [:flip_2, :take, :hold, :flip, :round_over]
 
   schema "rounds" do
-    belongs_to :game, Golf.Games.Game, type: :string
-
     field :state, Ecto.Enum, values: @states
     field :turn, :integer
     field :deck, {:array, :string}, default: []
@@ -14,9 +12,12 @@ defmodule Golf.Games.Round do
     field :hands, {:array, {:array, :map}}, default: []
     field :held_card, :map
 
-    field :player_out, :integer
+    belongs_to :game, Golf.Games.Game, type: :string
+    belongs_to :player_out, Golf.Games.Player
+    belongs_to :first_player, Golf.Games.Player
 
     has_many :events, Golf.Games.Event
+
     timestamps(type: :utc_datetime)
   end
 
@@ -30,8 +31,9 @@ defmodule Golf.Games.Round do
       :table_cards,
       :hands,
       :held_card,
-      :player_out
+      :player_out_id,
+      :first_player_id
     ])
-    |> validate_required([:game_id, :state, :turn, :deck, :table_cards, :hands])
+    |> validate_required([:game_id, :state, :turn, :deck, :table_cards, :hands, :first_player_id])
   end
 end
