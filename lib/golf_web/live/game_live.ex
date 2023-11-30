@@ -17,7 +17,9 @@ defmodule GolfWeb.GameLive do
       <h1 class="text-zinc-800 text-center">
         <div>
           <span class="text-lg font-bold">Game</span>
-          <span class="text-green-500 font-semibold copyable hover:cursor-pointer hover:underline"><%= @id %></span>
+          <span class="text-green-500 font-semibold copyable hover:cursor-pointer hover:underline">
+            <%= @id %>
+          </span>
         </div>
       </h1>
 

@@ -60,7 +60,7 @@ defmodule GolfWeb.HomeLive do
 
   @impl true
   def handle_event("join-lobby", %{"id" => id}, socket) do
-    case Golf.Lobbies.get_lobby(String.downcase(id)) do
+    case Golf.Lobbies.get_lobby(String.trim(id) |> String.downcase()) do
       nil ->
         {:noreply, put_flash(socket, :error, "Game #{id} not found.")}
 

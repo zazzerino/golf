@@ -424,6 +424,40 @@ defmodule Golf.Games do
         Enum.zip_with(rounds, round_nums, &round_stats(&1, &2, game.players))
       end
     )
+    |> Map.put(:totals, total_scores(game))
+  end
+
+  def total_scores(game) do
+    for p <- game.players, into: [] do
+      {p.user.name, total_scores(game, p.id)}
+    end
+    |> Enum.sort_by(fn {_, score} -> score end)
+  end
+
+  def total_scores(game, player_id) do
+    index = Enum.find_index(game.players, & &1.id == player_id)
+
+    Enum.reduce(game.rounds, 0, fn round, total ->
+      hand = Enum.at(round.hands, index)
+
+      score =
+        if player_set?(round, game.players, player_id) do
+          score(hand) * 2
+        else
+          score(hand)
+        end
+
+      total + score
+    end)
+  end
+
+  def player_set?(round, players, player_id) do
+    if round.state == :round_over and round.player_out == player_id do
+      index = Enum.find_index(players, & &1.id == player_id)
+      any_lower_score?(round.hands, index)
+    else
+      false
+    end
   end
 
   defp round_stats(round, round_num, players) do
@@ -434,13 +468,10 @@ defmodule Golf.Games do
       |> Map.put(:score, Enum.at(round.hands, out_index) |> score())
     end
 
-    players =
-      players
-      |> put_scores(round.hands)
-      # |> Enum.sort_by(& &1.score, :asc)
+    players = put_raw_scores(players, round.hands)
 
     players =
-      if player_out_set?(round.state, players, player_out) do
+      if round.state == :round_over && out_index && any_lower_score?(round.hands, out_index) do
         Enum.map(players, fn p -> double_score_if(p, p.id == player_out.id) end)
       else
         players
@@ -458,10 +489,19 @@ defmodule Golf.Games do
     }
   end
 
-  def player_out_set?(round_state, players, player_out) do
-    round_state == :round_over
-      && player_out
-      && Enum.any?(players, & &1.score < player_out.score)
+  def any_lower_score?(hands, index) do
+    score = score(Enum.at(hands, index))
+    Enum.any?(hands, &(score(&1) < score))
+  end
+
+  defp put_raw_scores(players, []) do
+    Enum.map(players, &Map.put(&1, :score, 0))
+  end
+
+  defp put_raw_scores(players, hands) do
+    Enum.zip_with(players, hands, fn p, hand ->
+      Map.put(p, :score, score(hand))
+    end)
   end
 
   def double_score_if(player, true) do
@@ -469,14 +509,4 @@ defmodule Golf.Games do
   end
 
   def double_score_if(player, _), do: player
-
-  defp put_scores(players, []) do
-    Enum.map(players, &Map.put(&1, :score, 0))
-  end
-
-  defp put_scores(players, hands) do
-    Enum.zip_with(players, hands, fn p, hand ->
-      Map.put(p, :score, score(hand))
-    end)
-  end
 end

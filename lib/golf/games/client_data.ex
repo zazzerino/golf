@@ -51,9 +51,8 @@ defmodule Golf.Games.ClientData do
       end
 
     players =
-      if round && player_out && Golf.Games.player_out_set?(round.state, players, player_out) do
+      if round && player_out && Golf.Games.player_set?(round, players, round.player_out) do
         Enum.map(players, fn p -> Golf.Games.double_score_if(p, p.id == player_out.id) end)
-        # |> Enum.sort_by(& &1.score, :asc)
       else
         players
       end
