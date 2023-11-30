@@ -128,19 +128,19 @@ defmodule Golf.Games do
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
-    {state, turn, flipped?, player_out} =
+    {state, turn, player_out} =
       cond do
         Enum.all?(hands, &all_face_up?/1) ->
-          {:round_over, round.turn, true, round.player_out}
+          {:round_over, round.turn, round.player_out}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, true, round.player_out || event.player_id}
+          {:take, round.turn + 1, round.player_out || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.flipped?, round.player_out}
+          {:take, round.turn + 1, round.player_out}
       end
 
-    %{state: state, turn: turn, hands: hands, flipped?: flipped?, player_out: player_out}
+    %{state: state, turn: turn, hands: hands, player_out: player_out}
   end
 
   def round_changes(%Round{state: :take} = round, %Event{action: :take_deck} = event) do
@@ -164,38 +164,9 @@ defmodule Golf.Games do
   end
 
   def round_changes(
-        %Round{state: :hold, flipped?: false} = round,
+        %Round{state: :hold} = round,
         %Event{action: :discard} = event
-      ) do
-    hand = Enum.at(round.hands, event.player.turn)
-
-    {state, turn, flipped?, player_out} =
-      cond do
-        # all_face_up?(hand) ->
-        #   {:take, round.turn + 1, true, round.player_out}
-
-        # TODO handle player going out early
-        one_face_down?(hand) ->
-          {:take, round.turn + 1, false, round.player_out}
-
-        true ->
-          {:flip, round.turn, false, round.player_out}
-      end
-
-    %{
-      state: state,
-      turn: turn,
-      held_card: nil,
-      table_cards: [round.held_card["name"] | round.table_cards],
-      flipped?: flipped?,
-      player_out: player_out
-    }
-  end
-
-  def round_changes(
-        %Round{state: :hold, flipped?: true} = round,
-        %Event{action: :discard} = event
-      ) do
+      ) when is_integer(round.player_out) do
     hands = List.update_at(round.hands, event.player.turn, &flip_all/1)
 
     {state, turn} =
@@ -216,26 +187,54 @@ defmodule Golf.Games do
 
   def round_changes(
         %Round{state: :hold} = round,
+        %Event{action: :discard} = event
+      ) when is_nil(round.player_out) do
+    hand = Enum.at(round.hands, event.player.turn)
+
+    {state, turn, player_out} =
+      cond do
+        # all_face_up?(hand) ->
+        #   {:take, round.turn + 1, true, round.player_out}
+
+        # TODO handle player going out early
+        one_face_down?(hand) ->
+          {:take, round.turn + 1, round.player_out}
+
+        true ->
+          {:flip, round.turn, round.player_out}
+      end
+
+    %{
+      state: state,
+      turn: turn,
+      held_card: nil,
+      table_cards: [round.held_card["name"] | round.table_cards],
+      player_out: player_out
+    }
+  end
+
+  def round_changes(
+        %Round{state: :hold} = round,
         %Event{action: :swap} = event
       ) do
     {hand, card} =
       round.hands
       |> Enum.at(event.player.turn)
-      |> flip_all_if(round.flipped?)
+      |> flip_all_if(is_integer(round.player_out))
       |> swap_card(event.hand_index, round.held_card["name"])
 
     hands = List.replace_at(round.hands, event.player.turn, hand)
 
-    {state, turn, flipped?, player_out} =
+    {state, turn, player_out} =
       cond do
         Enum.all?(hands, &all_face_up?/1) ->
-          {:round_over, round.turn, true, round.player_out || event.player_id}
+          {:round_over, round.turn, round.player_out || event.player_id}
 
         all_face_up?(hand) ->
-          {:take, round.turn + 1, true, round.player_out || event.player_id}
+          {:take, round.turn + 1, round.player_out || event.player_id}
 
         true ->
-          {:take, round.turn + 1, round.flipped?, round.player_out}
+          {:take, round.turn + 1, round.player_out}
       end
 
     %{
@@ -244,7 +243,6 @@ defmodule Golf.Games do
       held_card: nil,
       hands: hands,
       table_cards: [card | round.table_cards],
-      flipped?: flipped?,
       player_out: player_out
     }
   end
@@ -262,7 +260,7 @@ defmodule Golf.Games do
   def playable_cards(round, player, num_players) do
     if can_act_round?(round, player, num_players) do
       hand = Enum.at(round.hands, player.turn)
-      card_places(round.state, round.flipped?, hand)
+      card_places(round.state, is_integer(round.player_out), hand)
     else
       []
     end
@@ -428,7 +426,7 @@ defmodule Golf.Games do
   end
 
   def total_scores(game) do
-    for p <- game.players, into: [] do
+    for p <- game.players do
       {p.user.name, total_scores(game, p.id)}
     end
     |> Enum.sort_by(fn {_, score} -> score end)

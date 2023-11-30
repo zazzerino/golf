@@ -51,7 +51,7 @@ defmodule Golf.Games.ClientData do
       end
 
     players =
-      if round && player_out && Golf.Games.player_set?(round, players, round.player_out) do
+      if round && round.player_out && Golf.Games.player_set?(round, game.players, round.player_out) do
         Enum.map(players, fn p -> Golf.Games.double_score_if(p, p.id == player_out.id) end)
       else
         players
@@ -62,7 +62,7 @@ defmodule Golf.Games.ClientData do
       hostId: game.host_id,
       turn: (round && round.turn) || 0,
       state: Golf.Games.current_state(game),
-      isFlipped: round && round.flipped?,
+      isFlipped: round && round.player_out,
       deck: (round && round.deck) || [],
       tableCards: (round && round.table_cards) || [],
       players: players,

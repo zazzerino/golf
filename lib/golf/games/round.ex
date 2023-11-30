@@ -6,10 +6,8 @@ defmodule Golf.Games.Round do
 
   schema "rounds" do
     belongs_to :game, Golf.Games.Game, type: :string
-    # belongs_to :player_out, Golf.Games.Player
 
     field :state, Ecto.Enum, values: @states
-    field :flipped?, :boolean, default: false
     field :turn, :integer
     field :deck, {:array, :string}, default: []
     field :table_cards, {:array, :string}, default: []
@@ -27,7 +25,6 @@ defmodule Golf.Games.Round do
     |> cast(attrs, [
       :game_id,
       :state,
-      :flipped?,
       :turn,
       :deck,
       :table_cards,
@@ -35,6 +32,6 @@ defmodule Golf.Games.Round do
       :held_card,
       :player_out
     ])
-    |> validate_required([:game_id, :state, :flipped?, :turn, :deck, :table_cards, :hands])
+    |> validate_required([:game_id, :state, :turn, :deck, :table_cards, :hands])
   end
 end

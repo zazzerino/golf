@@ -117,7 +117,7 @@ defmodule GolfWeb.Components do
 
   def game_stats(assigns) do
     ~H"""
-    <div class="flex flex-col">
+    <div class="flex flex-col my-2">
       <div class="mb-2">
         <h4 class="font-semibold">Total Scores</h4>
         <.total_scores_table totals={@stats.totals} />
@@ -138,7 +138,7 @@ defmodule GolfWeb.Components do
 
   def total_scores_table(assigns) do
     ~H"""
-    <table class="table-auto border-separate border-spacing-1 border">
+    <table class="table-auto border-separate border-spacing-1 border px-2 rounded">
       <thead class="text-sm text-left">
         <tr>
           <th>Player</th>
@@ -157,7 +157,7 @@ defmodule GolfWeb.Components do
 
   def round_stats_table(assigns) do
     ~H"""
-    <table class="table-auto border-separate border-spacing-1 border border-slate-200">
+    <table class="table-auto border-separate border-spacing-1 border border-slate-200 px-2 rounded">
       <thead class="text-sm text-left">
         <tr>
           <th>Round</th>
