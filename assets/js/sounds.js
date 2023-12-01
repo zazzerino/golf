@@ -62,3 +62,21 @@ const soundCute = new Howl({
 export function playCute() {
   soundCute.play();
 }
+
+const soundArcade1 = new Howl({
+  src: ["/audio/arcade_game_tone_001.mp3"],
+  volume: 0.5,
+});
+
+export function playArcade1() {
+  soundArcade1.play();
+}
+
+const soundArcade2 = new Howl({
+  src: ["/audio/arcade_game_tone_002.mp3"],
+  volume: 0.5,
+});
+
+export function playArcade2() {
+  soundArcade2.play();
+}
