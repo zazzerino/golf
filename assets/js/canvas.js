@@ -57,8 +57,8 @@ export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroun
     height,
     backgroundColor,
     // antialias: true,
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true,
+    // resolution: window.devicePixelRatio || 1,
+    // autoDensity: true,
   });
 
   renderer.events.cursorStyles.hover = HOVER_CURSOR_STYLE;

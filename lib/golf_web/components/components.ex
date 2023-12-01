@@ -138,7 +138,7 @@ defmodule GolfWeb.Components do
 
   def total_scores_table(assigns) do
     ~H"""
-    <table class="mx-auto table-fixed border-separate border-spacing-y-2 border-spacing-x-2 border rounded">
+    <table class="min-w-[50%] mx-auto table-fixed border-separate border-spacing-y-2 border-spacing-x-2 border rounded">
       <thead class="text-sm text-center">
         <tr>
           <th :for={{username, _} <- @totals}><%= username %></th>

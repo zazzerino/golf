@@ -176,8 +176,7 @@ export class GameContext {
   }
 
   updateTurnText() {
-    const turnSprite = this.sprites.turn;
-    turnSprite.text = `Turn ${this.game.turn}`;
+    this.sprites.turn.text = `Turn ${this.game.turn}`;
   }
 
   // server events
@@ -207,12 +206,12 @@ export class GameContext {
     };
 
     hands.reverse();
-
     hands.forEach((tweens, i) => {
       tweens.reverse();
 
       tweens.forEach((tween, j) => {
-        tween.delay((HAND_SIZE-1-j) * 150 + i * 1000)
+        const delay = (HAND_SIZE-1-j) * 150 + i * 1000;
+        tween.delay(delay)
           .start();
 
         // start tweening the deck after dealing the first row

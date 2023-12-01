@@ -1,5 +1,7 @@
 import { Tween, Easing, update } from "../vendor/tween.esm.min.js";
+
 import { CENTER_X, DECK_X, DECK_Y, TABLE_CARD_X, TABLE_CARD_Y, rotationAt } from "./canvas";
+import { playPlace1, playPlace2, playPlace3, playShove2, playShove3 } from "./sounds.js";
 
 const HAND_SIZE = 6;
 
@@ -21,6 +23,7 @@ export function tweenWiggle(sprite, endX, duration=150, distance=1, repeats=2) {
   sprite.x = startX - distance;
 
   return new Tween(sprite)
+    .onStart(() => playPlace2())
     .to({ x: startX + distance }, duration / repeats)
     .easing(Easing.Quintic.InOut)
     .repeat(repeats)
@@ -44,7 +47,8 @@ export function handTweens(pos, handSprites) {
     sprite.rotation = 0;
 
     const tween = new Tween(sprite)
-      .to({ x, y, rotation }, 800)
+      .onStart(() => playPlace1())
+      .to({ x, y, rotation }, 650)
       .easing(Easing.Cubic.InOut);
 
     tweens.push(tween);
@@ -55,7 +59,10 @@ export function handTweens(pos, handSprites) {
 
 export function tweenDeck(deckSprite) {
   return new Tween(deckSprite)
-    .onStart(obj => { obj.x = CENTER_X })
+    .onStart(obj => {
+      playShove3();
+      obj.x = CENTER_X;
+    })
     .to({ x: DECK_X }, 200)
     .easing(Easing.Quadratic.Out);
 }
@@ -70,7 +77,7 @@ export function tweenTable(tableSprite) {
 }
 
 export function tweenTakeDeck(pos, heldSprite, deckSprite) {
-  // to coords
+  // move deck to held coords
   const x = heldSprite.x;
   const y = heldSprite.y;
   const rotation = rotationAt(pos);
@@ -81,6 +88,7 @@ export function tweenTakeDeck(pos, heldSprite, deckSprite) {
   heldSprite.rotation = 0;
 
   return new Tween(heldSprite)
+    .onStart(() => playPlace3())
     .to({ x, y, rotation }, 750)
     .easing(Easing.Quadratic.InOut);
 }
@@ -97,7 +105,10 @@ export function tweenTakeTable(pos, heldSprite, tableSprite) {
   heldSprite.rotation = 0;
 
   return new Tween(heldSprite)
-    .onStart(() => { tableSprite.visible = false })
+    .onStart(() => {
+      playShove2();
+      tableSprite.visible = false;
+    })
     .to({ x, y, rotation }, 750)
     .easing(Easing.Quadratic.InOut);
 }
@@ -111,7 +122,10 @@ export function tweenDiscard(pos, tableSprite, heldSprite) {
   tableSprite.rotation = rotationAt(pos);
 
   return new Tween(tableSprite)
-    .onStart(() => { heldSprite.visible = false })
+    .onStart(() => {
+      playShove2();
+      heldSprite.visible = false;
+    })
     .to({ x, y, rotation: 0 }, 750)
     .easing(Easing.Quadratic.InOut);
 }
@@ -122,6 +136,7 @@ export function tweenSwapTable(pos, tableSprite, handSprite) {
   tableSprite.rotation = rotationAt(pos);
 
   return new Tween(tableSprite)
+    .onStart(() => playShove2())
     .to({ x: TABLE_CARD_X, y: TABLE_CARD_Y, rotation: 0, }, 800)
     .easing(Easing.Quadratic.InOut);
 }
