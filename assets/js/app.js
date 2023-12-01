@@ -32,10 +32,15 @@ hooks.GameCanvas = {
       gameContext.onGameEvent(data.game, data.event);
     });
 
-    // this.handleEvent("round-over", _ => {
-    //   console.log("round over");
-    //   gameContext.onRoundOver();
-    // });
+    this.handleEvent("round-over", _ => {
+      console.log("round over");
+      gameContext.onRoundOver();
+    });
+
+    this.handleEvent("game-over", _ => {
+      console.log("game over");
+      gameContext.onGameOver();
+    })
   }
 }
 

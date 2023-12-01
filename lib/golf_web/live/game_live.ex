@@ -145,7 +145,9 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def handle_info({:game_over, _game}, socket) do
-    {:noreply, assign(socket, game_over?: true)}
+    {:noreply,
+     assign(socket, game_over?: true)
+     |> push_event("game-over", %{})}
   end
 
   @impl true

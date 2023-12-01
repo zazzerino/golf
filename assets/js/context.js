@@ -3,6 +3,7 @@ import {
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
   PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText,
 } from "./canvas";
+import { playCute, playDreamy } from "./sounds";
 
 import { 
   updateTweens, handTweens, tweenWiggle, 
@@ -246,6 +247,14 @@ export class GameContext {
     }
 
     this.onGameStart(game);
+  }
+
+  onRoundOver() {
+    playDreamy();
+  }
+
+  onGameOver() {
+    playCute();
   }
 
   onGameEvent(game, event) {
