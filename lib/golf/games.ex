@@ -99,19 +99,21 @@ defmodule Golf.Games do
   def can_act?(%Game{rounds: []}, _), do: false
 
   def can_act?(%Game{rounds: [round | _]} = game, player) do
-    can_act_round?(round, player, length(game.players))
+    can_act_round?(round, game.players, player)
   end
 
   def can_act_round?(%Round{state: :round_over}, _, _), do: false
 
-  def can_act_round?(%Round{state: :flip_2} = round, player, _) do
+  def can_act_round?(%Round{state: :flip_2} = round, _, player) do
     hand = Enum.at(round.hands, player.turn)
     num_cards_face_up(hand) < 2
   end
 
-  def can_act_round?(round, player, num_players) do
-    # :flip_2 is turn 0, so player 0 will move on round.turn - 1
-    rem(round.turn - 1, num_players) == player.turn
+  def can_act_round?(round, players, player) do
+    first_player_index = Enum.find_index(players, & &1.id == round.first_player_id)
+    player_index = Enum.find_index(players, & &1.id == player.id)
+    num_players = length(players)
+    rem(round.turn-1, num_players) == Integer.mod(player_index-first_player_index, num_players)
   end
 
   def round_changes(%Round{state: :flip_2} = round, %Event{action: :flip} = event) do
@@ -256,7 +258,7 @@ defmodule Golf.Games do
     }
   end
 
-  def playable_cards(%Round{state: :flip_2} = round, player, _) do
+  def playable_cards(%Round{state: :flip_2} = round, _, player) do
     hand = Enum.at(round.hands, player.turn)
 
     if num_cards_face_up(hand) < 2 do
@@ -266,8 +268,8 @@ defmodule Golf.Games do
     end
   end
 
-  def playable_cards(round, player, num_players) do
-    if can_act_round?(round, player, num_players) do
+  def playable_cards(round, players, player) do
+    if can_act_round?(round, players, player) do
       hand = Enum.at(round.hands, player.turn)
       card_places(round.state, is_integer(round.player_out_id), hand)
     else

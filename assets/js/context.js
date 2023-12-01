@@ -190,10 +190,10 @@ export class GameContext {
 
     let hands = [];
 
-    const hostIndex = this.game.players.findIndex(p => p.user_id === this.game.hostId);
-    if (hostIndex == null) throw new Error("host not found on game start");
+    const firstPlayerIndex = this.game.players.findIndex(p => p.id == this.game.firstPlayerId);
+    if (firstPlayerIndex == null) throw new Error("first player not found on game start");
 
-    const players = rotate(this.game.players, hostIndex);
+    const players = rotate(this.game.players, firstPlayerIndex);
 
     for (let i = players.length-1; i >= 0; i--) {
       const player = players[i];

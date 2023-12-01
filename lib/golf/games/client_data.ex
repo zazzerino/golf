@@ -27,7 +27,7 @@ defmodule Golf.Games.ClientData do
 
     playable_cards =
       if player && round do
-        Golf.Games.playable_cards(round, player, num_players)
+        Golf.Games.playable_cards(round, game.players, player)
       else
         []
       end
@@ -51,7 +51,8 @@ defmodule Golf.Games.ClientData do
       end
 
     players =
-      if round && round.player_out && Golf.Games.player_set?(round, game.players, round.player_out_id) do
+      if round && round.player_out &&
+           Golf.Games.player_set?(round, game.players, round.player_out_id) do
         Enum.map(players, fn p -> Golf.Games.double_score_if(p, p.id == player_out.id) end)
       else
         players
