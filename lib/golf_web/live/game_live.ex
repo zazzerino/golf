@@ -37,7 +37,7 @@ defmodule GolfWeb.GameLive do
         </.button>
       </div>
 
-      <div :if={@game_over?} class="font-semibold text-center text-lg py-2">Game Over</div>
+      <div :if={@game_over?} class="font-semibold text-center text-xl">Game Over</div>
 
       <div :if={@game} class="flex flex-col">
         <.game_stats stats={Games.game_stats(@game)} />
