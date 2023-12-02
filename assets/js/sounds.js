@@ -2,7 +2,7 @@ import {Howl} from "../vendor/howler.min.js";
 
 const soundPlace1 = new Howl({
   src: ['/audio/cardPlace1.wav'],
-  volume: 0.8,
+  volume: 0.7,
 });
 
 export function playPlace1() {
@@ -47,7 +47,7 @@ export function playShove3() {
 
 const soundDreamy = new Howl({
   src: ["/audio/zapsplat_multimedia_game_sound_harp_glissando_ascending_warm_dreamy_101779.mp3"],
-  volume: 0.5,
+  volume: 0.2,
 });
 
 export function playDreamy() {
@@ -56,7 +56,7 @@ export function playDreamy() {
 
 const soundCute = new Howl({
   src: ["/audio/zapsplat_multimedia_game_sound_harp_glissando_ascending_cute_fun_001_101830.mp3"],
-  volume: 0.5,
+  volume: 0.2,
 });
 
 export function playCute() {
@@ -65,7 +65,7 @@ export function playCute() {
 
 const soundArcade1 = new Howl({
   src: ["/audio/arcade_game_tone_001.mp3"],
-  volume: 0.5,
+  volume: 0.2,
 });
 
 export function playArcade1() {
@@ -74,7 +74,7 @@ export function playArcade1() {
 
 const soundArcade2 = new Howl({
   src: ["/audio/arcade_game_tone_002.mp3"],
-  volume: 0.5,
+  volume: 0.2,
 });
 
 export function playArcade2() {

@@ -426,6 +426,15 @@ export class GameContext {
     this.sprites.held.visible = false
     this.sprites.held = null;
 
+    const rank = player.hand[event.hand_index].name[0];
+    const colIndex = (event.hand_index + (HAND_SIZE / 2)) % HAND_SIZE;
+    const colCard = player.hand[colIndex];
+    const colRank = colCard["face_up?"] ? colCard.name[0] : null;
+
+    if (rank === colRank) {
+      playArcade1();
+    }
+
     // if this is the last round, flip all the player's cards
     if (game.isFlipped) {
       handSprites.forEach((sprite, i) => {
