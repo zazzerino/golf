@@ -189,10 +189,10 @@ export class GameContext {
 
     let hands = [];
 
-    const firstPlayerIndex = this.game.players.findIndex(p => p.id == this.game.firstPlayerId);
+    const firstPlayerIndex = game.players.findIndex(p => p.id == game.firstPlayerId);
     if (firstPlayerIndex == null) throw new Error("first player not found on game start");
 
-    const players = rotate(this.game.players, firstPlayerIndex);
+    const players = rotate(game.players, firstPlayerIndex);
 
     for (let i = players.length-1; i >= 0; i--) {
       const player = players[i];
@@ -215,7 +215,7 @@ export class GameContext {
           .start();
 
         // start tweening the deck after dealing the first row
-        if (i === this.game.players.length-1 && j === 2) {
+        if (i === game.players.length-1 && j === 2) {
           tween.onComplete(() => {
             tweenDeck(this.sprites.deck)
               .start()
@@ -288,7 +288,8 @@ export class GameContext {
   }
 
   onFlip(game, event) {
-    const player = game.players.find(p => p.id === event.player_id);
+    const playerIndex = game.players.findIndex(p => p.id === event.player_id);
+    const player = game.players[playerIndex];
     if (!player) throw new Error("player is null on flip");
 
     const rank = player.hand[event.hand_index].name[0];
@@ -298,6 +299,11 @@ export class GameContext {
 
     if (rank === colRank) {
       playArcade1();
+    }
+
+    const oldPlayer = this.game.players[playerIndex];
+    if (player.score >= oldPlayer.score + 10) {
+      playArcade2();
     }
 
     // get the sprite we need to update

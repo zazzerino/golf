@@ -13,32 +13,32 @@ let gameContext;
 hooks.GameCanvas = {
   mounted() {
     this.handleEvent("game-loaded", data => {
-      console.log("game loaded", data);
+      // console.log("game loaded", data);
       gameContext = new GameContext(data.game, this.el, this.pushEvent.bind(this))
     });
 
     this.handleEvent("game-started", data => {
-      console.log("game started", data);
+      // console.log("game started", data);
       gameContext.onGameStart(data.game);
     });
 
     this.handleEvent("round-started", data => {
-      console.log("round started", data);
+      // console.log("round started", data);
       gameContext.onRoundStart(data.game);
     });
 
     this.handleEvent("game-event", data => {
-      console.log("game event", data);
+      // console.log("game event", data);
       gameContext.onGameEvent(data.game, data.event);
     });
 
     this.handleEvent("round-over", _ => {
-      console.log("round over");
+      // console.log("round over");
       gameContext.onRoundOver();
     });
 
     this.handleEvent("game-over", _ => {
-      console.log("game over");
+      // console.log("game over");
       gameContext.onGameOver();
     })
   }
@@ -46,9 +46,9 @@ hooks.GameCanvas = {
 
 const copyables = document.querySelectorAll(".copyable");
 
-copyables.forEach(el => {
-  el.addEventListener("click", ev => {
-    const content = ev.target.textContent;
+copyables.forEach(elem => {
+  elem.addEventListener("click", event => {
+    const content = event.target.textContent;
     navigator.clipboard.writeText(content);
   });
 });
