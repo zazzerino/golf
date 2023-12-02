@@ -3,7 +3,7 @@ import {
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
   PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText,
 } from "./canvas";
-import { playArcade1, playArcade2, playCute, playDreamy } from "./sounds";
+import { playArcade1, playCute, playDreamy } from "./sounds";
 
 import { 
   updateTweens, handTweens, tweenWiggle, 
@@ -301,10 +301,10 @@ export class GameContext {
       playArcade1();
     }
 
-    const oldPlayer = this.game.players[playerIndex];
-    if (player.score >= oldPlayer.score + 10) {
-      playArcade2();
-    }
+    // const oldPlayer = this.game.players[playerIndex];
+    // if (player.score >= oldPlayer.score + 10) {
+    //   playArcade2();
+    // }
 
     // get the sprite we need to update
     const handSprites = this.sprites.hands[player.position];
