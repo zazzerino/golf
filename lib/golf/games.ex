@@ -33,12 +33,14 @@ defmodule Golf.Games do
     end
   end
 
+  defp player_from({user, i}) do
+    %Player{turn: i, user_id: user.id, user: user}
+  end
+
   def new_game(id, [host | _] = users, opts \\ Opts.default()) do
     players =
       Enum.with_index(users)
-      |> Enum.map(fn {user, i} ->
-        %Player{turn: i, user_id: user.id, user: user}
-      end)
+      |> Enum.map(&player_from/1)
 
     %Game{
       id: id,
@@ -47,6 +49,18 @@ defmodule Golf.Games do
       players: players,
       rounds: []
     }
+  end
+
+  defp next_first_player_id(game) do
+    case game.rounds do
+      [] ->
+        List.first(game.players).id
+
+      [round | _] ->
+        last_index = Enum.find_index(game.players, & &1.id == round.first_player_id)
+        index = rem(last_index + 1, length(game.players))
+        Enum.at(game.players, index).id
+    end
   end
 
   def new_round(game) do
@@ -61,17 +75,6 @@ defmodule Golf.Games do
       |> Enum.map(&%{"name" => &1, "face_up?" => false})
       |> Enum.chunk_every(@hand_size)
 
-    first_player_id =
-      case game.rounds do
-        [] ->
-          List.first(game.players).id
-
-        [round | _] ->
-          last_index = Enum.find_index(game.players, & &1.id == round.first_player_id)
-          index = rem(last_index + 1, length(game.players))
-          Enum.at(game.players, index).id
-      end
-
     %Round{
       game_id: game.id,
       state: :flip_2,
@@ -80,7 +83,7 @@ defmodule Golf.Games do
       hands: hands,
       table_cards: [table_card],
       events: [],
-      first_player_id: first_player_id
+      first_player_id: next_first_player_id(game)
     }
   end
 

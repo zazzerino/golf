@@ -34,13 +34,14 @@ export function tweenWiggle(sprite, endX, duration=150, distance=1, repeats=2) {
 export function handTweens(pos, handSprites) {
   const tweens = [];
 
-  // start with the last card in the hand (bottom right)
+  // start with the last card in the hand
   for (let i = HAND_SIZE-1; i >= 0; i--) {
     const sprite = handSprites[i];
 
     const x = sprite.x;
     const y = sprite.y;
-    const rotation = rotationAt(pos)
+    // const rotation = rotationAt(pos)
+    const rotation = 0;
 
     sprite.x = CENTER_X;
     sprite.y = DECK_Y + DECK_Y_OFFSET;
@@ -80,7 +81,8 @@ export function tweenTakeDeck(pos, heldSprite, deckSprite) {
   // move deck to held coords
   const x = heldSprite.x;
   const y = heldSprite.y;
-  const rotation = rotationAt(pos);
+  // const rotation = rotationAt(pos);
+  const rotation = 0;
 
   // set held card to deck coord
   heldSprite.x = deckSprite.x;
@@ -97,7 +99,8 @@ export function tweenTakeTable(pos, heldSprite, tableSprite) {
   // to coords
   const x = heldSprite.x;
   const y = heldSprite.y;
-  const rotation = rotationAt(pos);
+  // const rotation = rotationAt(pos);
+  const rotation = 0;
 
   // set held card to table coord
   heldSprite.x = tableSprite.x;
@@ -119,7 +122,7 @@ export function tweenDiscard(pos, tableSprite, heldSprite) {
 
   tableSprite.x = heldSprite.x;
   tableSprite.y = heldSprite.y;
-  tableSprite.rotation = rotationAt(pos);
+  // tableSprite.rotation = rotationAt(pos);
 
   return new Tween(tableSprite)
     .onStart(() => {
@@ -133,7 +136,7 @@ export function tweenDiscard(pos, tableSprite, heldSprite) {
 export function tweenSwapTable(pos, tableSprite, handSprite) {
   tableSprite.x = handSprite.x;
   tableSprite.y = handSprite.y;
-  tableSprite.rotation = rotationAt(pos);
+  // tableSprite.rotation = rotationAt(pos);
 
   return new Tween(tableSprite)
     .onStart(() => playShove2())
