@@ -1,7 +1,7 @@
 import { 
   CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
-  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText,
+  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText,
 } from "./canvas";
 
 import { 
@@ -17,15 +17,20 @@ function rotate(arr, n) {
   return arr.slice(n).concat(arr.slice(0, n));
 }
 
+function sortByScore(players) {
+  return [...players].sort((a, b) => a.score - b.score);
+}
+
 function initSprites() {
   return {
-    deck: null,
-    held: null,
-    table: [],
     hands: { bottom: [], left: [], top: [], right: [], },
     players: {},
-    round: null,
-    turn: null,
+    table: [],
+    // deck: null,
+    // held: null,
+    // round: null,
+    // turn: null,
+    // over: null,
   }
 }
 
@@ -42,7 +47,7 @@ export class GameContext {
     loadTextures().then(textures => {
       this.textures = textures;
 
-      // Clear prev children. Otherwise, when the websocket conn is dropped and reconnected it will draw the canvas twice.
+      // Clear prev children. Otherwise, if the websocket conn is dropped and reconnected it will draw the canvas twice.
       this.parentEl.replaceChildren();
       this.parentEl.appendChild(this.renderer.view);
 
@@ -158,8 +163,8 @@ export class GameContext {
   updatePlayerTexts(game) {
     for (const player of game.players) {
       const sprite = this.sprites.players[player.position];
-      const color = player.canAct ? PLAYER_TURN_COLOR : NOT_PLAYER_TURN_COLOR;
       const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
+      const color = player.canAct ? PLAYER_TURN_COLOR : NOT_PLAYER_TURN_COLOR;
       
       sprite.text = `${player.username}(${player.score}${points})`;
       sprite.style.fill = color;
@@ -180,6 +185,17 @@ export class GameContext {
 
   updateTurnText(game) {
     this.sprites.turn.text = `Turn ${game.turn}`;
+  }
+
+  addOverText(winnerName) {
+    const sprite = makeOverText(winnerName);
+
+    sprite.eventMode = "static";
+    sprite.cursor = "hover"
+    sprite.on("pointerdown", event => event.target.visible = false);
+
+    this.stage.addChild(sprite);
+    this.sprites.over = sprite;
   }
 
   // server events
@@ -235,6 +251,8 @@ export class GameContext {
   }
 
   onRoundStart(game) {
+    this.sprites.over.visible = false;
+
     this.game = game;
     this.removeSprites();
 
@@ -253,10 +271,38 @@ export class GameContext {
 
   onRoundOver() {
     playDreamy();
+
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: {y: 0.6},
+    });
+
+    const players = sortByScore(this.game.players);
+    const winnerName = players[0].username;
+    this.addOverText(winnerName);
+
+    // setTimeout(() => {
+    //   this.sprites.over.visible = false;
+    // }, 3250);
   }
 
   onGameOver() {
     playCute();
+
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: {y: 0.6},
+    });
+
+    const players = sortByScore(this.game.players);
+    const winnerName = players[0].username;
+    this.addOverText(winnerName);
+
+    // setTimeout(() => {
+    //   this.sprites.over.visible = false;
+    // }, 3250);
   }
 
   onGameEvent(game, event) {

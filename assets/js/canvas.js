@@ -36,17 +36,6 @@ export const PLAYER_TURN_COLOR = "#00ff00";
 export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
 
 const PLAYABLE_FILTER = new OutlineFilter(3, 0x00ffff, 0.5);
-// export const DISCARD_FILTER = new OutlineFilter(3, 0xff5500, 0.5);
-
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
-}
-
-export function rotationAt(pos) {
-  return pos === "left" || pos === "right"
-    ? toRadians(90)
-    : 0;
-}
 
 export async function bgLoadTextures(spritesheet = SPRITESHEET) {
   PIXI.Assets.backgroundLoad(spritesheet);
@@ -125,11 +114,9 @@ export function makePlayerText(player, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   const style = new PIXI.TextStyle({
     fill: NOT_PLAYER_TURN_COLOR,
     fontFamily: "monospace",
-    // fontFamily: "Comic Sans MS",
   });
 
-  const points = player.score == 1 || player.score == -1 ? "pt" : "pts";
-
+  const points = player.score === 1 || player.score === -1 ? "pt" : "pts";
   const content = `${player.username}(${player.score}${points})`;
   const text = new PIXI.Text(content, style);
 
@@ -190,6 +177,35 @@ export function makeTurnText(turn) {
   text.x = 5;
   text.y = 35;
   return text;
+}
+
+export function makeOverText(winnerName) {
+  const style = new PIXI.TextStyle({
+    fontFamily: "monospace",
+    fontSize: 48,
+    // fill: NOT_PLAYER_TURN_COLOR,
+    // fill: 0xffc0cb,
+    fill: 0xffffff,
+    // fill: 0xff69b4,
+    // fill: 0xffff00,
+  });
+
+  const content = `${winnerName} wins!`.toUpperCase();
+  const text = new PIXI.Text(content, style);
+  text.x = CENTER_X;
+  text.y = CENTER_Y;
+  text.anchor.set(0.5, 0.5);
+
+  let bgRect = new PIXI.Graphics();
+  // bg.beginFill(0x0000ff);
+  bgRect.beginFill(0x0088ff);
+  bgRect.drawRect(CENTER_X-200, CENTER_Y-60, 400, 120);
+
+  const container = new PIXI.Container();
+  container.addChild(bgRect);
+  container.addChild(text);
+
+  return container;
 }
 
 // interactive
@@ -415,3 +431,15 @@ export function handCardCoord(pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) 
       throw new Error(`invalid position: ${pos}`);
   }
 }
+
+// export const DISCARD_FILTER = new OutlineFilter(3, 0xff5500, 0.5);
+
+// function toRadians(degrees) {
+//   return degrees * (Math.PI / 180);
+// }
+
+// export function rotationAt(pos) {
+//   return pos === "left" || pos === "right"
+//     ? toRadians(90)
+//     : 0;
+// }
