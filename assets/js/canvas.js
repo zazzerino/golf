@@ -12,13 +12,15 @@ const CARD_HEIGHT = CARD_IMG_HEIGHT * CARD_SCALE;
 const GAME_WIDTH = 600;
 const GAME_HEIGHT = 600;
 
+const DECK_TABLE_OFFSET = 4;
+
 export const CENTER_X = GAME_WIDTH / 2;
 export const CENTER_Y = GAME_HEIGHT / 2;
 
-export const DECK_X = CENTER_X - CARD_WIDTH / 2 - 4;
+export const DECK_X = CENTER_X - CARD_WIDTH / 2 - DECK_TABLE_OFFSET;
 export const DECK_Y = CENTER_Y;
 
-export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + 4;
+export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + DECK_TABLE_OFFSET;
 export const TABLE_CARD_Y = CENTER_Y;
 
 const HAND_X_PAD = 3;
@@ -43,7 +45,10 @@ export async function bgLoadTextures(spritesheet = SPRITESHEET) {
 
 export async function loadTextures(spritesheet = SPRITESHEET) {
   return PIXI.Assets.load([spritesheet])
-    .then(assets => assets[spritesheet].textures);
+    .then(assets => {
+      console.log("assets", assets)
+      return assets[spritesheet].textures;
+    });
 }
 
 export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroundColor = BG_COLOR) {
@@ -77,6 +82,29 @@ function makeCardSprite(texture, x = 0, y = 0, rotation = 0) {
   sprite.rotation = rotation;
 
   return sprite;  
+}
+
+export function makeJokerSprite(x = 0, y = 0) {
+  const bgRect = new PIXI.Graphics();
+  bgRect.lineStyle(1)
+  bgRect.beginFill(0xffffff);
+  bgRect.drawRect(x - CARD_WIDTH / 2, y - CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT);
+
+  const style = new PIXI.TextStyle({
+    fontFamily: "monospace",
+    fontSize: 42,
+  });
+
+  const text = new PIXI.Text("JK", style);
+  text.x = x;
+  text.y = y;
+  text.anchor.set(0.5, 0.5);
+
+  const container = new PIXI.Container();
+  container.addChild(bgRect);
+  container.addChild(text);
+
+  return container;
 }
 
 export function makeDeckSprite(textures, state) {

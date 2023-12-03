@@ -1,7 +1,7 @@
 import { 
   CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
-  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText,
+  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText, makeJokerSprite,
 } from "./canvas";
 
 import { 
@@ -24,8 +24,8 @@ function sortByScore(players) {
 function initSprites() {
   return {
     hands: { bottom: [], left: [], top: [], right: [], },
-    players: {},
     table: [],
+    players: {},
     // deck: null,
     // held: null,
     // round: null,
