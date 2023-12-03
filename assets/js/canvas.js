@@ -32,6 +32,12 @@ const HOVER_CURSOR_STYLE = "url('/images/cursor-click.png'),auto";
 
 const BG_COLOR = "forestgreen";
 
+export const PLAYER_TURN_COLOR = "#00ff00";
+export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
+
+const PLAYABLE_FILTER = new OutlineFilter(3, 0x00ffff, 0.5);
+// export const DISCARD_FILTER = new OutlineFilter(3, 0xff5500, 0.5);
+
 function toRadians(degrees) {
   return degrees * (Math.PI / 180);
 }
@@ -115,9 +121,6 @@ export function makeHeldSprite(textures, card, pos, belongsToUser = true) {
 
 // text
 
-export const PLAYER_TURN_COLOR = "#00ff00";
-export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
-
 export function makePlayerText(player, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   const style = new PIXI.TextStyle({
     fill: NOT_PLAYER_TURN_COLOR,
@@ -190,8 +193,6 @@ export function makeTurnText(turn) {
 }
 
 // interactive
-
-const PLAYABLE_FILTER = new OutlineFilter(3, 0x00ffff, 0.5);
 
 export function makePlayable(sprite, callback) {
   sprite.eventMode = "static";

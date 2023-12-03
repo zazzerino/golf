@@ -196,6 +196,7 @@ defmodule GolfWeb.GameLive do
   defp action_at(state, "hand") when state in [:flip_2, :flip], do: :flip
   defp action_at(:take, "table"), do: :take_table
   defp action_at(:take, "deck"), do: :take_deck
+  defp action_at(:hold, "table"), do: :discard
   defp action_at(:hold, "held"), do: :discard
   defp action_at(:hold, "hand"), do: :swap
 

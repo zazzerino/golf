@@ -3,12 +3,13 @@ import {
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
   PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText,
 } from "./canvas";
-import { playArcade1, playCute, playDreamy } from "./sounds";
 
 import { 
   updateTweens, handTweens, tweenWiggle, 
   tweenDeck, tweenTable, tweenTakeDeck, tweenTakeTable, tweenDiscard, tweenSwapTable 
 } from "./tweens";
+
+import { playArcade1, playCute, playDreamy } from "./sounds";
 
 const HAND_SIZE = 6;
 
@@ -136,8 +137,10 @@ export class GameContext {
     this.sprites.held = sprite;
     this.stage.addChild(sprite);
 
-    if (this.isPlayable(this.game, "held")) {
-      makePlayable(sprite, () => this.onHeldClick(this.game.playerId));
+    if (this.sprites.table[0] && this.isPlayable(this.game, "held")) {
+      // makePlayable(sprite, () => this.onHeldClick(this.game.playerId));
+      makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
+      // this.sprites.table[0].filters = [DISCARD_FILTER];
     }
   }
 
@@ -214,7 +217,7 @@ export class GameContext {
         tween.delay(delay)
           .start();
 
-        // start tweening the deck after dealing the first row
+        // start tweening the deck after dealing the first row to the last player
         if (i === game.players.length-1 && j === 2) {
           tween.onComplete(() => {
             tweenDeck(this.sprites.deck)
@@ -292,6 +295,7 @@ export class GameContext {
     const player = game.players[playerIndex];
     if (!player) throw new Error("player is null on flip");
 
+    // check if the other card in the same column is face up and matches the flipped card
     const rank = player.hand[event.hand_index].name[0];
     const colIndex = (event.hand_index + (HAND_SIZE / 2)) % HAND_SIZE;
     const colCard = player.hand[colIndex];
@@ -316,7 +320,8 @@ export class GameContext {
 
     // wiggle the sprite
     const coord = handCardCoord(player.position, event.hand_index);
-    tweenWiggle(handSprite, coord.x).start();
+    tweenWiggle(handSprite, coord.x)
+      .start();
 
     handSprites.forEach((sprite, i) => {
       if (!this.isPlayable(game, `hand_${i}`)) {
@@ -344,11 +349,13 @@ export class GameContext {
       .start();
 
     if (player.id === game.playerId) {
-      makePlayable(this.sprites.held, () => this.onHeldClick(game.playerId))
       makeUnplayable(this.sprites.deck);
+      // makePlayable(this.sprites.held, () => this.onHeldClick(game.playerId))
 
       if (this.sprites.table[0]) {
-        makeUnplayable(this.sprites.table[0]);
+        // makeUnplayable(this.sprites.table[0]);
+        makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
+        // this.sprites.table[0].filters = [DISCARD_FILTER];
       }
 
       const handSprites = this.sprites.hands[player.position];
@@ -369,7 +376,12 @@ export class GameContext {
 
     if (player.id === game.playerId) {
       makeUnplayable(this.sprites.deck);
-      makePlayable(this.sprites.held, () => this.onHeldClick(player.id));
+      // makePlayable(this.sprites.held, () => this.onHeldClick(player.id));
+
+      if (this.sprites.table[0]) {
+        makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
+        // this.sprites.table[0].filters = [DISCARD_FILTER];
+      }
 
       const handSprites = this.sprites.hands[player.position];
       handSprites.forEach((sprite, index) => {
@@ -385,6 +397,11 @@ export class GameContext {
     this.addTableCard(game.tableCards[0]);
 
     tweenDiscard(player.position, this.sprites.table[0], this.sprites.held)
+      // .onComplete(() => {
+      //   if (this.isPlayable(game, "table")) {
+      //     makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
+      //   }
+      // })
       .start();
 
     this.sprites.held = null;
@@ -408,11 +425,19 @@ export class GameContext {
     if (this.isPlayable(game, "table")) {
       makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
     }
+
+    if (this.sprites.table[1]) {
+      makeUnplayable(this.sprites.table[1]);
+    }
   }
 
   onSwap(game, event) {
     const player = game.players.find(p => p.id === event.player_id);
     if (!player) throw new Error("player is null on swap");
+
+    if (this.sprites.table[0]) {
+      makeUnplayable(this.sprites.table[0]);
+    }
 
     // add table card
     this.addTableCard(game.tableCards[0]);
@@ -426,6 +451,11 @@ export class GameContext {
     handSprite.texture = this.textures[card];
 
     tweenSwapTable(player.position, this.sprites.table[0], handSprite)
+      // .onComplete(() => {
+      //   if (this.isPlayable(game, "table")) {
+      //     makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
+      //   }
+      // })
       .start();
 
     // remove held card
