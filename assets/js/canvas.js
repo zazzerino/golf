@@ -1,12 +1,8 @@
-// import * as PIXI from "../vendor/pixi.min.mjs";
 import { OutlineFilter } from "../vendor/pixi-filters.mjs";
 
-// const CARD_IMG_WIDTH = 88;
-// const CARD_IMG_HEIGHT = 124;
 const CARD_IMG_WIDTH = 242;
 const CARD_IMG_HEIGHT = 338;
 
-// const CARD_SCALE = 0.75;
 const CARD_SCALE = 0.29;
 
 const CARD_WIDTH = CARD_IMG_WIDTH * CARD_SCALE;
@@ -29,8 +25,8 @@ export const TABLE_CARD_Y = CENTER_Y;
 const HAND_X_PAD = 3;
 const HAND_Y_PAD = 10;
 
-// const DECK_CARD = "1B";
 const DOWN_CARD = "2B";
+const JOKER_CARD = "jk";
 
 const SPRITESHEET = "/images/spritesheets/cards.json";
 const HOVER_CURSOR_STYLE = "url('/images/cursor-click.png'),auto";
@@ -42,39 +38,35 @@ export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
 
 const PLAYABLE_FILTER = new OutlineFilter(3, 0x00ffff, 0.5);
 
-const cardRanks = "KA23456789TJQ".split("");
-const cardSuits = "CDHS".split("");
+const RANKS = "KA23456789TJQ".split("");
+const SUITS = "CDHS".split("");
 
-let cardPaths = [cardPath("2B"), cardPath("jk")];
-for (const rank of cardRanks) {
-  for (const suit of cardSuits) {
-    // const path = `/images/cards/${rank}${suit}.svg`;
-    const path = cardPath(rank + suit);
-    cardPaths.push(path);
+const CARD_PATHS = makeCardPaths();
+
+function makeCardPaths() {
+  const paths = [cardPath(DOWN_CARD), cardPath(JOKER_CARD)];
+  
+  for (const rank of RANKS) {
+    for (const suit of SUITS) {
+      paths.push(cardPath(rank + suit));
+    }
   }
+
+  return paths;
 }
 
 export function cardPath(name) {
   return `/images/cards/${name}.svg`;
 }
 
-export async function bgLoadTextures(spritesheet = SPRITESHEET) {
-  // PIXI.Assets.backgroundLoad(spritesheet);
-  PIXI.Assets.backgroundLoad(cardPaths)
+export async function bgLoadTextures() {
+  return PIXI.Assets.backgroundLoad(CARD_PATHS);
 }
 
-export async function loadTextures(spritesheet = SPRITESHEET) {
-  return PIXI.Assets.load(cardPaths)
-    .then(assets => {
-      console.log("assets", assets)
-      return assets;
-    });
-
-  // return PIXI.Assets.load([spritesheet])
-  //   .then(assets => {
-  //     console.log("assets", assets)
-  //     return assets[spritesheet].textures;
-  //   });
+export async function loadTextures() {
+  return PIXI.Assets.load(CARD_PATHS)
+    .catch(e => console.log("e2", e))
+    .then(assets => assets);
 }
 
 export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroundColor = BG_COLOR) {

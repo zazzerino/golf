@@ -1,10 +1,11 @@
 defmodule Golf.Games.Round do
-  use Ecto.Schema
+  # use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
 
   @states [:flip_2, :take, :hold, :flip, :round_over]
 
-  schema "rounds" do
+  typed_schema "rounds" do
     field :state, Ecto.Enum, values: @states
     field :turn, :integer
     field :deck, {:array, :string}, default: []

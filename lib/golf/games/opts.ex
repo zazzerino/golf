@@ -1,10 +1,10 @@
 defmodule Golf.Games.Opts do
-  use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
 
-  schema "opts" do
+  typed_schema "opts" do
+    field :num_rounds, :integer, default: 1, null: false
     belongs_to :game, Golf.Games.Game, type: :string
-    field :num_rounds, :integer, default: 1
   end
 
   def changeset(opts, attrs \\ %{}) do

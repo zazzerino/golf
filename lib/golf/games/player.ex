@@ -1,10 +1,10 @@
 defmodule Golf.Games.Player do
-  use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
 
   @derive {Jason.Encoder,
            only: [:id, :user_id, :username, :turn, :position, :score, :hand, :heldCard, :canAct]}
-  schema "players" do
+  typed_schema "players" do
     belongs_to :game, Golf.Games.Game, type: :string
     belongs_to :user, Golf.Accounts.User
 

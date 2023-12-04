@@ -37,6 +37,7 @@ defmodule Golf.Games do
     %Player{turn: i, user_id: user.id, user: user}
   end
 
+  @spec new_game(binary, list(Golf.Accounts.User.t), Opts.t) :: term
   def new_game(id, [host | _] = users, opts \\ Opts.default()) do
     players =
       Enum.with_index(users)
@@ -63,6 +64,7 @@ defmodule Golf.Games do
     end
   end
 
+  @spec new_round(Game.t) :: Round.t
   def new_round(game) do
     jokers = List.duplicate("jk", @num_decks * 2)
     deck = Enum.shuffle(new_deck(@num_decks) ++ jokers)
@@ -88,10 +90,11 @@ defmodule Golf.Games do
     }
   end
 
+  @spec current_round(Game.t) :: Round.t | nil
   def current_round(%Game{rounds: [round | _]}), do: round
   def current_round(_), do: nil
 
-  @spec current_state(any) :: any
+  @spec current_state(Game.t) :: :no_round | :flip_2 | :take | :hold | :flip | :round_over | :game_over
   def current_state(%Game{rounds: [round | _]} = game)
       when round.state == :round_over and length(game.rounds) >= game.opts.num_rounds do
     :game_over
@@ -100,6 +103,7 @@ defmodule Golf.Games do
   def current_state(%Game{rounds: []}), do: :no_round
   def current_state(%Game{rounds: [round | _]}), do: round.state
 
+  @spec can_act?(Game.t, Player.t) :: boolean
   def can_act?(%Game{rounds: []}, _), do: false
 
   def can_act?(%Game{rounds: [round | _]} = game, player) do
@@ -287,6 +291,7 @@ defmodule Golf.Games do
   defp card_places(:flip, _, hand), do: face_down_cards(hand)
   defp card_places(:hold, _, _), do: [:held, :hand_0, :hand_1, :hand_2, :hand_3, :hand_4, :hand_5]
 
+  @spec score(map) :: integer
   def score(hand) do
     hand
     |> Enum.map(&rank_if_face_up/1)

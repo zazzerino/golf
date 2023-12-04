@@ -1,12 +1,12 @@
 defmodule Golf.Games.Game do
-  use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
 
   @primary_key {:id, :string, []}
 
   @states [:no_round, :flip_2, :take, :hold, :flip, :round_over, :game_over]
 
-  schema "games" do
+  typed_schema "games" do
     belongs_to :host, Golf.Accounts.User
     has_many :players, Golf.Games.Player
     has_many :rounds, Golf.Games.Round

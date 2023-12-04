@@ -7,7 +7,7 @@ import { bgLoadTextures } from "./canvas";
 
 bgLoadTextures();
 
-let hooks = {};
+const hooks = {};
 let gameContext;
 
 hooks.GameCanvas = {
@@ -44,20 +44,6 @@ hooks.GameCanvas = {
   }
 }
 
-const copyables = document.querySelectorAll(".copyable");
-
-copyables.forEach(elem => {
-  elem.addEventListener("click", event => {
-    const content = event.target.textContent;
-    navigator.clipboard.writeText(content);
-  });
-});
-
-window.addEventListener("phx:clear-chat-input", _ => {
-  const inputEl = document.querySelector("#chat-form-input");
-  inputEl.value = "";
-});
-
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {hooks, params: {_csrf_token: csrfToken}})
 
@@ -74,3 +60,17 @@ liveSocket.connect()
 // liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+const copyables = document.querySelectorAll(".copyable");
+
+copyables.forEach(elem => {
+  elem.addEventListener("click", event => {
+    const content = event.target.textContent;
+    navigator.clipboard.writeText(content);
+  });
+});
+
+window.addEventListener("phx:clear-chat-input", _ => {
+  const inputEl = document.querySelector("#chat-form-input");
+  inputEl.value = "";
+});

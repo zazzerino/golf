@@ -1,8 +1,9 @@
 defmodule Golf.Accounts.User do
-  use Ecto.Schema
+  # use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
 
-  schema "users" do
+  typed_schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true

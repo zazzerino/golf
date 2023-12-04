@@ -1,12 +1,12 @@
 defmodule Golf.Games.Event do
-  use Ecto.Schema
+  use TypedEctoSchema
   import Ecto.Changeset
   alias Golf.Games.{Game, Round}
 
   @actions [:take_deck, :take_table, :swap, :discard, :flip]
 
   @derive {Jason.Encoder, only: [:round_id, :player_id, :action, :hand_index]}
-  schema "events" do
+  typed_schema "events" do
     belongs_to :round, Golf.Games.Round
     belongs_to :player, Golf.Games.Player
 
