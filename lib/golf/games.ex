@@ -64,7 +64,7 @@ defmodule Golf.Games do
   end
 
   def new_round(game) do
-    deck = new_deck(@num_decks) |> Enum.shuffle()
+    deck = Enum.shuffle(new_deck(@num_decks) ++ List.duplicate("jk", @num_decks * 2))
     num_hand_cards = @hand_size * length(game.players)
 
     {:ok, hand_cards, deck} = deal_from(deck, num_hand_cards)
@@ -300,6 +300,7 @@ defmodule Golf.Games do
 
   defp rank_value(rank) when is_integer(rank) do
     case rank do
+      ?j -> -2
       ?K -> 0
       ?A -> 1
       ?2 -> 2
@@ -331,45 +332,81 @@ defmodule Golf.Games do
        a, a, a] when is_integer(a) ->
         -40
 
+      [?j, b, ?j,
+       ?j, c, ?j] ->
+        score_ranks([b, c], -28)
+
       # outer cols match, -20 points
       [a, b, a,
        a, c, a] when is_integer(a) ->
         score_ranks([b, c], total - 20)
+
+      [?j, ?j, a,
+       ?j, ?j, b] ->
+        score_ranks([a, b], total - 18)
 
       # left 2 cols match, -10 points
       [a, a, b,
        a, a, c] when is_integer(a) ->
         score_ranks([b, c], total - 10)
 
+      [a, ?j, ?j,
+       b, ?j, ?j] ->
+        score_ranks([a, b], total - 18)
+
       # right 2 cols match, -10 points
       [a, b, b,
        c, b, b] when is_integer(b) ->
         score_ranks([a, c], total - 10)
+
+      [?j, b, c,
+       ?j, d, e] ->
+        score_ranks([b, c, d, e], total - 4)
 
       # left col match
       [a, b, c,
        a, d, e] when is_integer(a) ->
         score_ranks([b, c, d, e], total)
 
+      [a, ?j, c,
+       d, ?j, e] ->
+        score_ranks([a, c, d, e], total - 4)
+
       # middle col match
       [a, b, c,
        d, b, e] when is_integer(b) ->
         score_ranks([a, c, d, e], total)
+
+      [a, b, ?j,
+       d, e, ?j] ->
+        score_ranks([a, b, d, e], total - 4)
 
       # right col match
       [a, b, c,
        d, e, c] when is_integer(c) ->
         score_ranks([a, b, d, e], total)
 
+      [?j, b,
+       ?j, c] ->
+        score_ranks([b, c], total - 4)
+
       # left col match, pass 2
       [a, b,
        a, c] when is_integer(a) ->
         score_ranks([b, c], total)
 
+      [a, ?j,
+       c, ?j] ->
+        score_ranks([a, c], total - 4)
+
       # right col match, pass 2
       [a, b,
        c, b] when is_integer(b) ->
         score_ranks([a, c], total)
+
+      [?j,
+       ?j] ->
+        total - 4
 
       # match, pass 3
       [a,

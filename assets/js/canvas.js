@@ -1,10 +1,13 @@
 // import * as PIXI from "../vendor/pixi.min.mjs";
 import { OutlineFilter } from "../vendor/pixi-filters.mjs";
 
-const CARD_IMG_WIDTH = 88;
-const CARD_IMG_HEIGHT = 124;
+// const CARD_IMG_WIDTH = 88;
+// const CARD_IMG_HEIGHT = 124;
+const CARD_IMG_WIDTH = 242;
+const CARD_IMG_HEIGHT = 338;
 
-const CARD_SCALE = 0.75;
+// const CARD_SCALE = 0.75;
+const CARD_SCALE = 0.29;
 
 const CARD_WIDTH = CARD_IMG_WIDTH * CARD_SCALE;
 const CARD_HEIGHT = CARD_IMG_HEIGHT * CARD_SCALE;
@@ -26,7 +29,7 @@ export const TABLE_CARD_Y = CENTER_Y;
 const HAND_X_PAD = 3;
 const HAND_Y_PAD = 10;
 
-const DECK_CARD = "1B";
+// const DECK_CARD = "1B";
 const DOWN_CARD = "2B";
 
 const SPRITESHEET = "/images/spritesheets/cards.json";
@@ -39,16 +42,39 @@ export const NOT_PLAYER_TURN_COLOR = "#ff77ff";
 
 const PLAYABLE_FILTER = new OutlineFilter(3, 0x00ffff, 0.5);
 
+const cardRanks = "KA23456789TJQ".split("");
+const cardSuits = "CDHS".split("");
+
+let cardPaths = [cardPath("2B"), cardPath("jk")];
+for (const rank of cardRanks) {
+  for (const suit of cardSuits) {
+    // const path = `/images/cards/${rank}${suit}.svg`;
+    const path = cardPath(rank + suit);
+    cardPaths.push(path);
+  }
+}
+
+export function cardPath(name) {
+  return `/images/cards/${name}.svg`;
+}
+
 export async function bgLoadTextures(spritesheet = SPRITESHEET) {
-  PIXI.Assets.backgroundLoad(spritesheet);
+  // PIXI.Assets.backgroundLoad(spritesheet);
+  PIXI.Assets.backgroundLoad(cardPaths)
 }
 
 export async function loadTextures(spritesheet = SPRITESHEET) {
-  return PIXI.Assets.load([spritesheet])
+  return PIXI.Assets.load(cardPaths)
     .then(assets => {
       console.log("assets", assets)
-      return assets[spritesheet].textures;
+      return assets;
     });
+
+  // return PIXI.Assets.load([spritesheet])
+  //   .then(assets => {
+  //     console.log("assets", assets)
+  //     return assets[spritesheet].textures;
+  //   });
 }
 
 export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroundColor = BG_COLOR) {
@@ -75,8 +101,8 @@ function makeCardSprite(texture, x = 0, y = 0, rotation = 0) {
   // texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   const sprite = PIXI.Sprite.from(texture);
 
-  sprite.scale.set(CARD_SCALE, CARD_SCALE);
   sprite.anchor.set(0.5);
+  sprite.scale.set(CARD_SCALE, CARD_SCALE);
   sprite.x = x;
   sprite.y = y;
   sprite.rotation = rotation;
@@ -84,37 +110,18 @@ function makeCardSprite(texture, x = 0, y = 0, rotation = 0) {
   return sprite;  
 }
 
-export function makeJokerSprite(x = 0, y = 0) {
-  const bgRect = new PIXI.Graphics();
-  bgRect.lineStyle(1)
-  bgRect.beginFill(0xffffff);
-  bgRect.drawRect(x - CARD_WIDTH / 2, y - CARD_HEIGHT / 2, CARD_WIDTH, CARD_HEIGHT);
-
-  const style = new PIXI.TextStyle({
-    fontFamily: "monospace",
-    fontSize: 42,
-  });
-
-  const text = new PIXI.Text("JK", style);
-  text.x = x;
-  text.y = y;
-  text.anchor.set(0.5, 0.5);
-
-  const container = new PIXI.Container();
-  container.addChild(bgRect);
-  container.addChild(text);
-
-  return container;
-}
-
 export function makeDeckSprite(textures, state) {
   const x = deckX(state);
-  const texture = textures[DECK_CARD];
+  // const texture = textures[DECK_CARD];
+  // const path = cardPath(DOWN_CARD);
+  const path = cardPath(DOWN_CARD);
+  const texture = textures[path];
   return makeCardSprite(texture, x, DECK_Y);
 }
 
 export function makeTableSprite(textures, card) {
-  return makeCardSprite(textures[card], TABLE_CARD_X, TABLE_CARD_Y);
+  // return makeCardSprite(textures[card], TABLE_CARD_X, TABLE_CARD_Y);
+  return makeCardSprite(textures[cardPath(card)], TABLE_CARD_X, TABLE_CARD_Y);
 }
 
 export function makeHandSprites(textures, hand, pos) {
@@ -122,8 +129,9 @@ export function makeHandSprites(textures, hand, pos) {
 
   hand.forEach((card, i) => {
     const name = card["face_up?"] ? card.name : DOWN_CARD;
+    const texture = textures[cardPath(name)];
     const coord = handCardCoord(pos, i);
-    const sprite = makeCardSprite(textures[name], coord.x, coord.y, coord.rotation);
+    const sprite = makeCardSprite(texture, coord.x, coord.y, coord.rotation);
     sprites.push(sprite);
   });
 
@@ -132,7 +140,7 @@ export function makeHandSprites(textures, hand, pos) {
 
 export function makeHeldSprite(textures, card, pos, belongsToUser = true) {
   const coord = heldCardCoord(pos);
-  const texture = belongsToUser ? textures[card] : textures[DOWN_CARD];
+  const texture = belongsToUser ? textures[cardPath(card)] : textures[cardPath(DOWN_CARD)];
   return makeCardSprite(texture, coord.x, coord.y, coord.rotation);
 }
 
@@ -162,7 +170,8 @@ export function makePlayerText(player, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
       break;
 
     case "left":
-      text.x = CARD_HEIGHT + yPad;
+      // text.x = CARD_HEIGHT + yPad;
+      text.x = CARD_HEIGHT;
       text.y = CENTER_Y - CARD_HEIGHT * 2;
       text.anchor.set(0.5, 0.0);
       break;

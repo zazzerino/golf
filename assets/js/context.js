@@ -1,7 +1,7 @@
 import { 
-  CENTER_X, loadTextures, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
+  CENTER_X, loadTextures, cardPath, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
-  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText, makeJokerSprite,
+  PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText,
 } from "./canvas";
 
 import { 
@@ -26,11 +26,6 @@ function initSprites() {
     hands: { bottom: [], left: [], top: [], right: [], },
     table: [],
     players: {},
-    // deck: null,
-    // held: null,
-    // round: null,
-    // turn: null,
-    // over: null,
   }
 }
 
@@ -251,7 +246,9 @@ export class GameContext {
   }
 
   onRoundStart(game) {
-    this.sprites.over.visible = false;
+    if (this.sprites.over) {
+      this.sprites.over.visible = false;
+    }
 
     this.game = game;
     this.removeSprites();
@@ -347,7 +344,7 @@ export class GameContext {
     const colCard = player.hand[colIndex];
     const colRank = colCard["face_up?"] ? colCard.name[0] : null;
 
-    if (rank === colRank) {
+    if (rank === colRank || rank === "j") {
       playArcade1();
     }
 
@@ -362,7 +359,7 @@ export class GameContext {
    
     // update the sprite's texture
     const cardName = player.hand[event.hand_index]["name"];
-    handSprite.texture = this.textures[cardName];
+    handSprite.texture = this.textures[cardPath(cardName)];
 
     // wiggle the sprite
     const coord = handCardCoord(player.position, event.hand_index);
@@ -460,7 +457,7 @@ export class GameContext {
       // if the game is over, flip all the player's cards
       if (game.isFlipped) {
         const name = player.hand[i].name;
-        sprite.texture = this.textures[name];
+        sprite.texture = this.textures[cardPath(name)];
       }
     });
 
@@ -494,7 +491,7 @@ export class GameContext {
 
     const handSprites = this.sprites.hands[player.position];
     const handSprite = handSprites[index];
-    handSprite.texture = this.textures[card];
+    handSprite.texture = this.textures[cardPath(card)];
 
     tweenSwapTable(player.position, this.sprites.table[0], handSprite)
       // .onComplete(() => {
@@ -521,7 +518,7 @@ export class GameContext {
     if (game.isFlipped) {
       handSprites.forEach((sprite, i) => {
         const card = player.hand[i].name;
-        sprite.texture = this.textures[card];
+        sprite.texture = this.textures[cardPath(card)];
       });
     }
 

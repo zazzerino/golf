@@ -13,7 +13,7 @@ let gameContext;
 hooks.GameCanvas = {
   mounted() {
     this.handleEvent("game-loaded", data => {
-      console.log("game loaded", data);
+      // console.log("game loaded", data);
       gameContext = new GameContext(data.game, this.el, this.pushEvent.bind(this))
     });
 
@@ -28,7 +28,7 @@ hooks.GameCanvas = {
     });
 
     this.handleEvent("game-event", data => {
-      console.log("game event", data);
+      // console.log("game event", data);
       gameContext.onGameEvent(data.game, data.event);
     });
 

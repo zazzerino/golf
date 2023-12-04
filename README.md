@@ -21,3 +21,4 @@ After this turn, all every player's cards will be flipped over.
 - Card images from https://screamingbrainstudios.itch.io/poker-pack
 - Casino sounds by Kenney Vleugels (www.kenney.nl)
 - Other sounds from zapsplat (www.zapsplat.com)
+- www.me.uk/cards/
