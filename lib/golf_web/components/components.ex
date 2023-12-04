@@ -141,12 +141,12 @@ defmodule GolfWeb.Components do
     <table class="min-w-[50%] mx-auto table-fixed border-separate border-spacing-y-2 border-spacing-x-2 border rounded">
       <thead class="text-sm text-center">
         <tr>
-          <th :for={{username, _} <- @totals}><%= username %></th>
+          <th :for={{username, _, _} <- @totals}><%= username %></th>
         </tr>
       </thead>
       <tbody class="text-center">
         <tr>
-          <td :for={{_, score} <- @totals}><%= score %></td>
+          <td :for={{_, _, score} <- @totals}><%= score %></td>
         </tr>
       </tbody>
     </table>
@@ -186,7 +186,7 @@ defmodule GolfWeb.Components do
 
   def player_stats(assigns) do
     ~H"""
-    <li><span class="text-blue-500 font-semibold"><%= @name %></span>: <%= @score %></li>
+    <li><span class="font-semibold"><%= @name %></span>: <%= @score %></li>
     """
   end
 end

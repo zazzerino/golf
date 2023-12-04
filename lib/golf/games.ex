@@ -64,7 +64,8 @@ defmodule Golf.Games do
   end
 
   def new_round(game) do
-    deck = Enum.shuffle(new_deck(@num_decks) ++ List.duplicate("jk", @num_decks * 2))
+    jokers = List.duplicate("jk", @num_decks * 2)
+    deck = Enum.shuffle(new_deck(@num_decks) ++ jokers)
     num_hand_cards = @hand_size * length(game.players)
 
     {:ok, hand_cards, deck} = deal_from(deck, num_hand_cards)
@@ -300,7 +301,7 @@ defmodule Golf.Games do
 
   defp rank_value(rank) when is_integer(rank) do
     case rank do
-      ?j -> -2
+      ?j -> -2 # joker
       ?K -> 0
       ?A -> 1
       ?2 -> 2
@@ -476,11 +477,13 @@ defmodule Golf.Games do
     |> Map.put(:totals, total_scores(game))
   end
 
+  @name_colors ~w(blue green red purple)
+
   def total_scores(game) do
-    for p <- game.players do
-      {p.user.name, total_scores(game, p.id)}
-    end
-    |> Enum.sort_by(fn {_, score} -> score end)
+    game.players
+    |> Enum.zip_with(@name_colors, fn p, c -> Map.put(p, :color, c) end)
+    |> Enum.map(fn p -> {p.user.name, p.color, total_scores(game, p.id)} end)
+    |> Enum.sort_by(fn {_, _, score} -> score end)
   end
 
   def total_scores(game, player_id) do
@@ -499,19 +502,6 @@ defmodule Golf.Games do
       total + score
     end)
   end
-
-  # def round_player_score(round, players, player_id) do
-  #   index = Enum.find_index(players, & &1.id == player_id)
-
-  #   hand = Enum.at(round.hands, index)
-
-  #   score =
-  #     if player_set?(round, players, player_id) do
-  #       score(hand) * 2
-  #     else
-  #       score(hand)
-  #     end
-  # end
 
   def player_set?(round, players, player_id) do
     if round.state == :round_over and round.player_out_id == player_id do

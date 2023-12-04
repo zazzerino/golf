@@ -138,9 +138,7 @@ export class GameContext {
     this.stage.addChild(sprite);
 
     if (this.sprites.table[0] && this.isPlayable(this.game, "held")) {
-      // makePlayable(sprite, () => this.onHeldClick(this.game.playerId));
       makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
-      // this.sprites.table[0].filters = [DISCARD_FILTER];
     }
   }
 
@@ -278,10 +276,6 @@ export class GameContext {
     const players = sortByScore(this.game.players);
     const winnerName = players[0].username;
     this.addOverText(winnerName);
-
-    // setTimeout(() => {
-    //   this.sprites.over.visible = false;
-    // }, 3250);
   }
 
   onGameOver() {
@@ -296,10 +290,6 @@ export class GameContext {
     const players = sortByScore(this.game.players);
     const winnerName = players[0].username;
     this.addOverText(winnerName);
-
-    // setTimeout(() => {
-    //   this.sprites.over.visible = false;
-    // }, 3250);
   }
 
   onGameEvent(game, event) {
@@ -393,12 +383,9 @@ export class GameContext {
 
     if (player.id === game.playerId) {
       makeUnplayable(this.sprites.deck);
-      // makePlayable(this.sprites.held, () => this.onHeldClick(game.playerId))
 
       if (this.sprites.table[0]) {
-        // makeUnplayable(this.sprites.table[0]);
         makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
-        // this.sprites.table[0].filters = [DISCARD_FILTER];
       }
 
       const handSprites = this.sprites.hands[player.position];
@@ -419,11 +406,9 @@ export class GameContext {
 
     if (player.id === game.playerId) {
       makeUnplayable(this.sprites.deck);
-      // makePlayable(this.sprites.held, () => this.onHeldClick(player.id));
 
       if (this.sprites.table[0]) {
         makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
-        // this.sprites.table[0].filters = [DISCARD_FILTER];
       }
 
       const handSprites = this.sprites.hands[player.position];

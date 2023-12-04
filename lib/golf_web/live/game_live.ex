@@ -7,9 +7,6 @@ defmodule GolfWeb.GameLive do
   alias Golf.Games.{Player, Event}
   alias Golf.Games.ClientData, as: Data
 
-  # <div class="mx-auto space-y-1 w-[510px] md:w-[600px]">
-  # <div id="game-canvas" class="my-0 origin-top-left scale-[85%] md:scale-100" phx-hook="GameCanvas" phx-update="ignore"></div>
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -62,7 +59,8 @@ defmodule GolfWeb.GameLive do
        can_start_game?: nil,
        can_start_round?: nil,
        round_over?: nil,
-       game_over?: nil
+       game_over?: nil,
+       name_colors: %{}
      )
      |> stream(:chat_messages, [])}
   end

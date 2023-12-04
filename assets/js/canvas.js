@@ -219,12 +219,15 @@ export function makeTurnText(turn) {
 export function makeOverText(winnerName) {
   const style = new PIXI.TextStyle({
     fontFamily: "monospace",
-    fontSize: 48,
-    // fill: NOT_PLAYER_TURN_COLOR,
-    // fill: 0xffc0cb,
-    fill: 0xffffff,
-    // fill: 0xff69b4,
-    // fill: 0xffff00,
+    fontSize: 90,
+    fill: "#4488ff",
+    stroke: "#000000",
+    strokeThickness: 4,
+    dropShadow: true,
+    // dropShadowColor: "#ffffff",
+    dropShadowBlur: 2,
+    align: "center",
+    wordWrap: true,
   });
 
   const content = `${winnerName} wins!`.toUpperCase();
@@ -233,13 +236,12 @@ export function makeOverText(winnerName) {
   text.y = CENTER_Y;
   text.anchor.set(0.5, 0.5);
 
-  let bgRect = new PIXI.Graphics();
-  // bg.beginFill(0x0000ff);
-  bgRect.beginFill(0x0088ff);
-  bgRect.drawRect(CENTER_X-200, CENTER_Y-60, 400, 120);
+  // let bgRect = new PIXI.Graphics();
+  // bgRect.beginFill(0x0088ff);
+  // bgRect.drawRect(CENTER_X-200, CENTER_Y-60, 400, 120);
 
   const container = new PIXI.Container();
-  container.addChild(bgRect);
+  // container.addChild(bgRect);
   container.addChild(text);
 
   return container;
