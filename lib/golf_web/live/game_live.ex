@@ -44,24 +44,45 @@ defmodule GolfWeb.GameLive do
   #   """
   # end
 
+  # min-w-[470px] min-h-[585px]
+        # <div class="absolute left-1/2 translate-x-[-50%] top-[90%] translate-y-[-100%]">
+
+      # <div id="game-wrapper" class="flex-1 basis-1/2 min-w-[470px] min-h-[585px]">
+# class="absolute top-[92%] left-1/2 translate-x-[-50%] translate-y-[-100%]"
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="game-page relative min-w-[470px]">
-      <div id="game-canvas" class="absolute" phx-hook="GameCanvas" phx-update="ignore"></div>
+    <div class="w-full h-full flex flex-row">
+      <div class="relative grow h-[calc(100vh-1.5rem)] min-w-[470px] min-h-[585px]">
+        <div class="w-full h-full" id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
-      <div class="absolute left-1/2 translate-x-[-50%] top-[84%]">
-        <.game_button :if={@can_start_game?} phx-click="start-game">
-          Start Game
-        </.game_button>
+        <div class="absolute top-[90%] left-1/2 translate-x-[-50%] translate-y-[-50%]">
+          <.game_button :if={@can_start_game?}
+                        phx-click="start-game"
+          >
+            Start Game
+          </.game_button>
 
-        <.button :if={@can_start_round?} phx-click="start-round">
-          Start Round
-        </.button>
+          <.game_button :if={@can_start_round?} phx-click="start-round">
+            Start Round
+          </.game_button>
+        </div>
+      </div>
+
+      <div :if={@game} class="mb-2 max-h-[calc(100vh-1.5rem)] flex-none flex flex-col w-1/3 px-4 space-y-4 divide-y">
+        <.game_stats class="max-h-[42vh] overflow-y-auto flex-1 " stats={Games.game_stats(@game)} />
+        <.chat class="mt-auto bg-white flex-1 flex flex-col" messages={@streams.chat_messages} submit="submit-chat" />
       </div>
     </div>
     """
   end
+
+        # <.game_stats class="max-h-[50vh] overflow-y-auto" stats={Games.game_stats(@game)} />
+        # <.chat class="max-h-[50vh] mb-1 bg-white rounded-lg flex flex-col" messages={@streams.chat_messages} submit="submit-chat" />
+
+      # class="absolute top-[80%] left-1/2 translate-x-[-50%] translate-y-[-50%]"
+
+      # <div :if={@game} class="h-[100vh] w-[25vw] ml-auto">
 
       # <div :if={@game_over?} class="font-semibold text-center text-xl">Game Over</div>
       # <div :if={@game} class="flex flex-col">

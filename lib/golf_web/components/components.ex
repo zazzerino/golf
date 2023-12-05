@@ -47,9 +47,13 @@ defmodule GolfWeb.Components do
     """
   end
 
+  attr :class, :string, default: nil
+  attr :messages, :list, default: []
+  attr :submit, :any
+
   def chat(assigns) do
     ~H"""
-    <div class="mt-auto">
+    <div class={@class}>
       <.chat_messages messages={@messages} />
       <.chat_form submit={@submit} />
     </div>
@@ -58,12 +62,12 @@ defmodule GolfWeb.Components do
 
   def chat_messages(assigns) do
     ~H"""
-    <div class="">
-      <h4 class="font-semibold text-md">Messages</h4>
+    <div>
+      <h4 class="font-semibold text-md mb-1">Messages</h4>
       <ul
         id="chat-messages"
         phx-update="stream"
-        class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
+        class="overflow-y-auto bg-slate-100 rounded-lg max-h-[33vh]"
       >
         <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
       </ul>
@@ -71,11 +75,12 @@ defmodule GolfWeb.Components do
     """
   end
 
+        # class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
   defp chat_message(assigns) do
     ~H"""
     <li id={@id} class="text-left">
-      <span class="text-xs text-green-500"><%= @msg.inserted_at %></span>
-      <span class="font-semibold text-violet-500"><%= @msg.user.name %></span>:
+      <span class="text-xs text-green-600"><%= @msg.inserted_at %></span>
+      <span class="font-semibold text-purple-500"><%= @msg.user.name %></span>:
       <span class="text-sm"><%= @msg.content %></span>
     </li>
     """
@@ -117,9 +122,9 @@ defmodule GolfWeb.Components do
 
   def game_stats(assigns) do
     ~H"""
-    <div class="flex flex-col my-2">
+    <div class={["flex flex-col my-1", @class]}>
       <div class="mb-2">
-        <h4 class="font-semibold text-center">Total Scores</h4>
+        <h4 class="font-semibold mb-1 text-center">Total Scores</h4>
         <.total_scores_table totals={@stats.totals} />
       </div>
 
@@ -138,13 +143,13 @@ defmodule GolfWeb.Components do
 
   def total_scores_table(assigns) do
     ~H"""
-    <table class="min-w-[50%] mx-auto table-fixed border-separate border-spacing-y-2 border-spacing-x-2 border rounded">
+    <table class="min-w-[50%] mx-auto table-fixed border-separate border rounded">
       <thead class="text-sm text-center">
         <tr>
           <th :for={{username, _, _} <- @totals}><%= username %></th>
         </tr>
       </thead>
-      <tbody class="text-center">
+      <tbody class="text-center text-sm">
         <tr>
           <td :for={{_, _, score} <- @totals}><%= score %></td>
         </tr>
@@ -156,7 +161,7 @@ defmodule GolfWeb.Components do
   def round_stats_table(assigns) do
     ~H"""
     <table class="table-auto border-separate border-spacing-1 border border-slate-200 px-2 rounded">
-      <thead class="text-sm text-left">
+      <thead class="text-xs text-left">
         <tr>
           <th>Round</th>
           <th>Scores</th>
@@ -186,7 +191,7 @@ defmodule GolfWeb.Components do
 
   def player_stats(assigns) do
     ~H"""
-    <li><span class="font-semibold"><%= @name %></span>: <%= @score %></li>
+    <li><span class="font-semibold text-purple-500"><%= @name %></span>: <span class="text-green-600"><%= @score %></span></li>
     """
   end
 
@@ -209,6 +214,7 @@ defmodule GolfWeb.Components do
     <button
       type={@type}
       class={[
+        "uppercase outline outline-black outline-1",
         "phx-submit-loading:opacity-75 rounded-lg bg-blue-500 hover:bg-blue-600 py-4 px-6",
         "text-2xl font-bold leading-6 text-white active:text-white/80 drop-shadow-lg border-solid",
         @class
