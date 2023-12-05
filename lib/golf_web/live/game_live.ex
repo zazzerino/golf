@@ -1,7 +1,7 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
-  # import GolfWeb.Components, only: [chat: 1, game_stats: 1]
+  import GolfWeb.Components, only: [chat: 1, game_stats: 1]
 
   alias Golf.{Games, GamesDb, Chat}
   alias Golf.Games.{Player, Event}
@@ -47,16 +47,33 @@ defmodule GolfWeb.GameLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
+    <div class="">
+      <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
-    <div class="mt-[-7rem] sm:mt-1">
-      <.button :if={@can_start_game?} phx-click="start-game">
-        Start Game
-      </.button>
+      <h1 class="text-zinc-800 text-center">
+        <div>
+          <span class="text-lg font-bold">Game</span>
+          <span class="text-green-500 font-semibold copyable hover:cursor-pointer hover:underline">
+            <%= @id %>
+          </span>
+        </div>
+      </h1>
 
-      <.button :if={@can_start_round?} phx-click="start-round">
-        Start Round
-      </.button>
+      <div class="">
+        <.button :if={@can_start_game?} phx-click="start-game">
+          Start Game
+        </.button>
+
+        <.button :if={@can_start_round?} phx-click="start-round">
+          Start Round
+        </.button>
+      </div>
+
+      <div :if={@game_over?} class="font-semibold text-center text-xl">Game Over</div>
+      <div :if={@game} class="flex flex-col">
+        <.game_stats stats={Games.game_stats(@game)} />
+        <.chat messages={@streams.chat_messages} submit="submit-chat" />
+      </div>
     </div>
     """
   end

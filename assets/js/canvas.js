@@ -10,14 +10,14 @@ const CARD_HEIGHT = CARD_IMG_HEIGHT * CARD_SCALE;
 
 const DECK_TABLE_OFFSET = 4; // px between deck and table cards
 
-export const CENTER_X = window.innerWidth / 2;
-export const CENTER_Y = window.innerHeight / 2;
+// export const CENTER_X = window.innerWidth / 2;
+// export const CENTER_Y = window.innerHeight / 2;
 
-export const DECK_X = CENTER_X - CARD_WIDTH / 2 - DECK_TABLE_OFFSET;
-export const DECK_Y = CENTER_Y;
+// export const DECK_X = CENTER_X - CARD_WIDTH / 2 - DECK_TABLE_OFFSET;
+// export const DECK_Y = CENTER_Y;
 
-export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + DECK_TABLE_OFFSET;
-export const TABLE_CARD_Y = CENTER_Y;
+// export const TABLE_CARD_X = CENTER_X + CARD_WIDTH / 2 + DECK_TABLE_OFFSET;
+// export const TABLE_CARD_Y = CENTER_Y;
 
 const HAND_X_PAD = 3;
 const HAND_Y_PAD = 10;
@@ -25,7 +25,6 @@ const HAND_Y_PAD = 10;
 const DOWN_CARD = "2B";
 const JOKER_CARD = "jk";
 
-// const SPRITESHEET = "/images/spritesheets/cards.json";
 const HOVER_CURSOR_STYLE = "url('/images/cursor-click.png'),auto";
 
 const BG_COLOR = "forestgreen";
@@ -216,8 +215,6 @@ export function makeOverText(width, height, winnerName) {
 
   const content = `${winnerName} wins!`.toUpperCase();
   const text = new PIXI.Text(content, style);
-  // text.x = CENTER_X;
-  // text.y = CENTER_Y;
   text.x = width / 2;
   text.y = height / 2;
   text.anchor.set(0.5, 0.5);
@@ -299,6 +296,21 @@ export function heldCardCoord(width, height, pos, xPad = HAND_X_PAD, yPad = HAND
   }
 
   return {x, y, rotation: 0};
+}
+
+export function handCardCoord(width, height, pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+  switch (pos) {
+    case "bottom":
+      return handCardBottomCoord(width, height, index, xPad, yPad);
+    case "top":
+      return handCardTopCoord(width, height, index, xPad, yPad);
+    case "left":
+      return handCardLeftCoord(width, height, index, xPad, yPad);
+    case "right":
+      return handCardRightCoord(width, height, index, xPad, yPad);
+    default:
+      throw new Error(`invalid position: ${pos}`);
+  }
 }
 
 function handCardBottomCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
@@ -454,21 +466,6 @@ function handCardRightCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND
   }
 
   return {x, y, rotation: 0};
-}
-
-export function handCardCoord(width, height, pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
-  switch (pos) {
-    case "bottom":
-      return handCardBottomCoord(width, height, index, xPad, yPad);
-    case "top":
-      return handCardTopCoord(width, height, index, xPad, yPad);
-    case "left":
-      return handCardLeftCoord(width, height, index, xPad, yPad);
-    case "right":
-      return handCardRightCoord(width, height, index, xPad, yPad);
-    default:
-      throw new Error(`invalid position: ${pos}`);
-  }
 }
 
 // export const DISCARD_FILTER = new OutlineFilter(3, 0xff5500, 0.5);

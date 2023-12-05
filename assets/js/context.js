@@ -1,5 +1,5 @@
 import { 
-  CENTER_X, loadTextures, cardPath, handCardCoord, makeRenderer, makeContainer, makePlayable, makeUnplayable,
+  loadTextures, cardPath, handCardCoord, makeRenderer, makeContainer, makePlayable, makeUnplayable,
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
   PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText,
 } from "./canvas";
@@ -295,7 +295,7 @@ export class GameContext {
     this.removeSprites();
 
     this.addDeck();
-    this.sprites.deck.x = CENTER_X;
+    this.sprites.deck.x = this.parentEl.clientWidth / 2;
 
     this.addRoundText();
     this.addTurnText();
