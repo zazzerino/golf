@@ -4,10 +4,21 @@
 
 /* This file is for your main application CSS */
 
-#game-canvas {
+/* #game-canvas {
   width: 600px;
   height: 600px;
   background-color: forestgreen;
+} */
+
+#game-canvas {
+  /* width: 100vw; */
+  /* height: 100vh; */
+  width: 99vw;
+  height: 96vh;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 585px;
+  min-width: 470px;
 }
 
 #game-canvas canvas {

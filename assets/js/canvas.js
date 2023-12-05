@@ -8,13 +8,10 @@ const CARD_SCALE = 0.29;
 const CARD_WIDTH = CARD_IMG_WIDTH * CARD_SCALE;
 const CARD_HEIGHT = CARD_IMG_HEIGHT * CARD_SCALE;
 
-const GAME_WIDTH = 600;
-const GAME_HEIGHT = 600;
+const DECK_TABLE_OFFSET = 4; // px between deck and table cards
 
-const DECK_TABLE_OFFSET = 4;
-
-export const CENTER_X = GAME_WIDTH / 2;
-export const CENTER_Y = GAME_HEIGHT / 2;
+export const CENTER_X = window.innerWidth / 2;
+export const CENTER_Y = window.innerHeight / 2;
 
 export const DECK_X = CENTER_X - CARD_WIDTH / 2 - DECK_TABLE_OFFSET;
 export const DECK_Y = CENTER_Y;
@@ -28,7 +25,7 @@ const HAND_Y_PAD = 10;
 const DOWN_CARD = "2B";
 const JOKER_CARD = "jk";
 
-const SPRITESHEET = "/images/spritesheets/cards.json";
+// const SPRITESHEET = "/images/spritesheets/cards.json";
 const HOVER_CURSOR_STYLE = "url('/images/cursor-click.png'),auto";
 
 const BG_COLOR = "forestgreen";
@@ -64,33 +61,30 @@ export async function bgLoadTextures() {
 }
 
 export async function loadTextures() {
-  return PIXI.Assets.load(CARD_PATHS)
-    .catch(e => console.log("e2", e))
-    .then(assets => assets);
+  return PIXI.Assets.load(CARD_PATHS);
 }
 
-export function makeRenderer(width = GAME_WIDTH, height = GAME_HEIGHT, backgroundColor = BG_COLOR) {
+export function makeRenderer(width, height, backgroundColor = BG_COLOR) {
   const renderer = new PIXI.Renderer({
     width,
     height,
     backgroundColor,
+    resolution: window.devicePixelRatio || 1,
+    autoDensity: true,
     // antialias: true,
-    // resolution: window.devicePixelRatio || 1,
-    // autoDensity: true,
   });
 
   renderer.events.cursorStyles.hover = HOVER_CURSOR_STYLE;
   return renderer;
 }
 
-export function makeStage() {
+export function makeContainer() {
   return new PIXI.Container();
 }
 
 // sprites
 
 function makeCardSprite(texture, x = 0, y = 0, rotation = 0) {
-  // texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
   const sprite = PIXI.Sprite.from(texture);
 
   sprite.anchor.set(0.5);
@@ -102,27 +96,25 @@ function makeCardSprite(texture, x = 0, y = 0, rotation = 0) {
   return sprite;  
 }
 
-export function makeDeckSprite(textures, state) {
-  const x = deckX(state);
-  // const texture = textures[DECK_CARD];
-  // const path = cardPath(DOWN_CARD);
-  const path = cardPath(DOWN_CARD);
-  const texture = textures[path];
-  return makeCardSprite(texture, x, DECK_Y);
+export function makeDeckSprite(width, height, textures, gameState) {
+  const texture = textures[cardPath(DOWN_CARD)];
+  const {x, y} = deckCoord(width, height, gameState);
+  return makeCardSprite(texture, x, y);
 }
 
-export function makeTableSprite(textures, card) {
-  // return makeCardSprite(textures[card], TABLE_CARD_X, TABLE_CARD_Y);
-  return makeCardSprite(textures[cardPath(card)], TABLE_CARD_X, TABLE_CARD_Y);
+export function makeTableSprite(width, height, textures, card) {
+  const texture = textures[cardPath(card)]
+  const {x, y} = tableCoord(width, height);
+  return makeCardSprite(texture, x, y);
 }
 
-export function makeHandSprites(textures, hand, pos) {
+export function makeHandSprites(width, height, textures, hand, pos) {
   const sprites = [];
 
   hand.forEach((card, i) => {
     const name = card["face_up?"] ? card.name : DOWN_CARD;
     const texture = textures[cardPath(name)];
-    const coord = handCardCoord(pos, i);
+    const coord = handCardCoord(width, height, pos, i);
     const sprite = makeCardSprite(texture, coord.x, coord.y, coord.rotation);
     sprites.push(sprite);
   });
@@ -130,15 +122,16 @@ export function makeHandSprites(textures, hand, pos) {
   return sprites;
 }
 
-export function makeHeldSprite(textures, card, pos, belongsToUser = true) {
-  const coord = heldCardCoord(pos);
-  const texture = belongsToUser ? textures[cardPath(card)] : textures[cardPath(DOWN_CARD)];
+export function makeHeldSprite(width, height, textures, cardName, pos, showCard = true) {
+  const card = showCard ? cardName : DOWN_CARD;
+  const texture = textures[cardPath(card)];
+  const coord = heldCardCoord(width, height, pos);
   return makeCardSprite(texture, coord.x, coord.y, coord.rotation);
 }
 
 // text
 
-export function makePlayerText(player, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+export function makePlayerText(width, height, player, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   const style = new PIXI.TextStyle({
     fill: NOT_PLAYER_TURN_COLOR,
     fontFamily: "monospace",
@@ -150,27 +143,26 @@ export function makePlayerText(player, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
 
   switch (player.position) {
     case "bottom":
-      text.x = GAME_WIDTH / 2;
-      text.y = GAME_HEIGHT - 5;
+      text.x = width / 2;
+      text.y = height - 5;
       text.anchor.set(0.5, 1.0);
       break;
 
     case "top":
-      text.x = GAME_WIDTH / 2;
+      text.x = width / 2;
       text.y = 5;
       text.anchor.set(0.5, 0.0);
       break;
 
     case "left":
-      // text.x = CARD_HEIGHT + yPad;
       text.x = CARD_HEIGHT;
-      text.y = CENTER_Y - CARD_HEIGHT * 2;
+      text.y = height / 2 - CARD_HEIGHT * 2;
       text.anchor.set(0.5, 0.0);
       break;
 
     case "right":
-      text.x = GAME_WIDTH - CARD_HEIGHT - yPad;
-      text.y = CENTER_Y - CARD_HEIGHT * 2;
+      text.x = width - CARD_HEIGHT - yPad;
+      text.y = height / 2 - CARD_HEIGHT * 2;
       text.anchor.set(0.5, 0.0);
       break;
       
@@ -208,7 +200,7 @@ export function makeTurnText(turn) {
   return text;
 }
 
-export function makeOverText(winnerName) {
+export function makeOverText(width, height, winnerName) {
   const style = new PIXI.TextStyle({
     fontFamily: "monospace",
     fontSize: 90,
@@ -224,8 +216,10 @@ export function makeOverText(winnerName) {
 
   const content = `${winnerName} wins!`.toUpperCase();
   const text = new PIXI.Text(content, style);
-  text.x = CENTER_X;
-  text.y = CENTER_Y;
+  // text.x = CENTER_X;
+  // text.y = CENTER_Y;
+  text.x = width / 2;
+  text.y = height / 2;
   text.anchor.set(0.5, 0.5);
 
   // let bgRect = new PIXI.Graphics();
@@ -258,32 +252,46 @@ export function makeUnplayable(sprite) {
 
 // coords
 
-export function deckX(state) {
-  return state == "no_round" ? CENTER_X : DECK_X;
+export function deckCoord(width, height, state) {
+  const x = state === "no_round"
+    ? width / 2
+    : width / 2 - CARD_WIDTH / 2 - DECK_TABLE_OFFSET
+
+  return {
+    x,
+    y: height / 2,
+  }
 }
 
-export function heldCardCoord(pos, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+export function tableCoord(width, height) {
+  return {
+    x: width / 2 + CARD_WIDTH / 2 + DECK_TABLE_OFFSET,
+    y: height / 2,
+  }
+}
+
+export function heldCardCoord(width, height, pos, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x, y;
 
   switch (pos) {
     case "bottom":
-      x = CENTER_X + CARD_WIDTH * 2.5;
-      y = GAME_HEIGHT - CARD_HEIGHT - yPad - 30;
+      x = width / 2 + CARD_WIDTH * 2.5;
+      y = height - CARD_HEIGHT - yPad - 30;
       break;
 
     case "top":
-      x = CENTER_X - CARD_WIDTH * 1.5;
+      x = width / 2 - CARD_WIDTH * 1.5;
       y = CARD_HEIGHT + 1.3 * yPad + 30;
       break;
 
     case "left":
       x = CARD_WIDTH + yPad + 5;
-      y = CENTER_Y + CARD_HEIGHT * 1.5 + xPad;
+      y = height / 2 + CARD_HEIGHT * 1.5 + xPad;
       break;
 
     case "right":
-      x = GAME_WIDTH - CARD_WIDTH - yPad - 5;
-      y = CENTER_Y + CARD_HEIGHT * 1.5 + xPad;
+      x = width - CARD_WIDTH - yPad - 5;
+      y = height / 2 + CARD_HEIGHT * 1.5 + xPad;
       break;
 
     default:
@@ -293,38 +301,38 @@ export function heldCardCoord(pos, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   return {x, y, rotation: 0};
 }
 
-function handCardBottomCoord(index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+function handCardBottomCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x = 0, y = 0;
 
   switch (index) {
     case 0:
-      x = CENTER_X - CARD_WIDTH - xPad;
-      y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
+      x = width / 2 - CARD_WIDTH - xPad;
+      y = height - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
       break;
 
     case 1:
-      x = CENTER_X;
-      y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
+      x = width / 2;
+      y = height - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
       break;
 
     case 2:
-      x = CENTER_X + CARD_WIDTH + xPad;
-      y = GAME_HEIGHT - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
+      x = width / 2 + CARD_WIDTH + xPad;
+      y = height - CARD_HEIGHT * 1.5 - yPad * 1.3 - 30;
       break;
 
     case 3:
-      x = CENTER_X - CARD_WIDTH - xPad;
-      y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad - 30;
+      x = width / 2 - CARD_WIDTH - xPad;
+      y = height - CARD_HEIGHT / 2 - yPad - 30;
       break;
 
     case 4:
-      x = CENTER_X;
-      y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad - 30;
+      x = width / 2;
+      y = height - CARD_HEIGHT / 2 - yPad - 30;
       break;
 
     case 5:
-      x = CENTER_X + CARD_WIDTH + xPad;
-      y = GAME_HEIGHT - CARD_HEIGHT / 2 - yPad - 30;
+      x = width / 2 + CARD_WIDTH + xPad;
+      y = height - CARD_HEIGHT / 2 - yPad - 30;
       break;
 
     default:
@@ -334,37 +342,37 @@ function handCardBottomCoord(index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   return {x, y, rotation: 0};
 }
 
-function handCardTopCoord(index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+function handCardTopCoord(width, _height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x = 0, y = 0;
 
   switch (index) {
     case 0:
-      x = CENTER_X + CARD_WIDTH + xPad;
+      x = width / 2 + CARD_WIDTH + xPad;
       y = CARD_HEIGHT * 1.5 + yPad * 1.3 + 30;
       break;
 
     case 1:
-      x = CENTER_X;
+      x = width / 2;
       y = CARD_HEIGHT * 1.5 + yPad * 1.3 + 30;
       break;
 
     case 2:
-      x = CENTER_X - CARD_WIDTH - xPad;
+      x = width / 2 - CARD_WIDTH - xPad;
       y = CARD_HEIGHT * 1.5 + yPad * 1.3 + 30;
       break;
 
     case 3:
-      x = CENTER_X + CARD_WIDTH + xPad;
+      x = width / 2 + CARD_WIDTH + xPad;
       y = CARD_HEIGHT / 2 + yPad + 30;
       break;
 
     case 4:
-      x = CENTER_X;
+      x = width / 2;
       y = CARD_HEIGHT / 2 + yPad + 30;
       break;
 
     case 5:
-      x = CENTER_X - CARD_WIDTH - xPad;
+      x = width / 2 - CARD_WIDTH - xPad;
       y = CARD_HEIGHT / 2 + yPad + 30;
       break;
   }
@@ -372,92 +380,92 @@ function handCardTopCoord(index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   return {x, y, rotation: 0};
 }
 
-function handCardLeftCoord(index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+function handCardLeftCoord(_width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x = 0, y = 0;
 
   switch (index) {
     case 0:
-      x = CARD_WIDTH * 1.5 + yPad * 1.3 + 5;
-      y = CENTER_Y - CARD_HEIGHT - xPad;
+      x = CARD_WIDTH * 1.5 + yPad * 1.3;
+      y = height / 2 - CARD_HEIGHT - xPad;
       break;
 
     case 1:
-      x = CARD_WIDTH * 1.5 + yPad * 1.3 + 5;
-      y = CENTER_Y;
+      x = CARD_WIDTH * 1.5 + yPad * 1.3;
+      y = height / 2;
       break;
 
     case 2:
-      x = CARD_WIDTH * 1.5 + yPad * 1.3 + 5;
-      y = CENTER_Y + CARD_HEIGHT + xPad;
+      x = CARD_WIDTH * 1.5 + yPad * 1.3;
+      y = height / 2 + CARD_HEIGHT + xPad;
       break;
 
     case 3:
       x = CARD_WIDTH / 2 + yPad;
-      y = CENTER_Y - CARD_HEIGHT - xPad;
+      y = height / 2 - CARD_HEIGHT - xPad;
       break;
 
     case 4:
       x = CARD_WIDTH / 2 + yPad;
-      y = CENTER_Y;
+      y = height / 2;
       break;
 
     case 5:
       x = CARD_WIDTH / 2 + yPad;
-      y = CENTER_Y + CARD_HEIGHT + xPad;
+      y = height / 2 + CARD_HEIGHT + xPad;
       break;
   }
 
   return {x, y, rotation: 0};
 }
 
-function handCardRightCoord(index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+function handCardRightCoord(width, height, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   let x = 0, y = 0;
 
   switch (index) {
     case 0:
-      x = GAME_WIDTH - CARD_WIDTH * 1.5 - yPad * 1.3 - 5;
-      y = CENTER_Y + CARD_HEIGHT + xPad;
+      x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+      y = height / 2 + CARD_HEIGHT + xPad;
       break;
 
     case 1:
-      x = GAME_WIDTH - CARD_WIDTH * 1.5 - yPad * 1.3 - 5;
-      y = CENTER_Y;
+      x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+      y = height / 2;
       break;
 
     case 2:
-      x = GAME_WIDTH - CARD_WIDTH * 1.5 - yPad * 1.3 - 5;
-      y = CENTER_Y - CARD_HEIGHT - xPad;
+      x = width - CARD_WIDTH * 1.5 - yPad * 1.3;
+      y = height / 2 - CARD_HEIGHT - xPad;
       break;
 
     case 3:
-      x = GAME_WIDTH - CARD_WIDTH / 2 - yPad;
-      y = CENTER_Y + CARD_HEIGHT + xPad;
+      x = width - CARD_WIDTH / 2 - yPad;
+      y = height / 2 + CARD_HEIGHT + xPad;
       break;
 
     case 4:
-      x = GAME_WIDTH - CARD_WIDTH / 2 - yPad;
-      y = CENTER_Y;
+      x = width - CARD_WIDTH / 2 - yPad;
+      y = height / 2;
       break;
 
     case 5:
-      x = GAME_WIDTH - CARD_WIDTH / 2 - yPad;
-      y = CENTER_Y - CARD_HEIGHT - xPad;
+      x = width - CARD_WIDTH / 2 - yPad;
+      y = height / 2 - CARD_HEIGHT - xPad;
       break;
   }
 
   return {x, y, rotation: 0};
 }
 
-export function handCardCoord(pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
+export function handCardCoord(width, height, pos, index, xPad = HAND_X_PAD, yPad = HAND_Y_PAD) {
   switch (pos) {
     case "bottom":
-      return handCardBottomCoord(index, xPad, yPad);
+      return handCardBottomCoord(width, height, index, xPad, yPad);
     case "top":
-      return handCardTopCoord(index, xPad, yPad);
+      return handCardTopCoord(width, height, index, xPad, yPad);
     case "left":
-      return handCardLeftCoord(index, xPad, yPad);
+      return handCardLeftCoord(width, height, index, xPad, yPad);
     case "right":
-      return handCardRightCoord(index, xPad, yPad);
+      return handCardRightCoord(width, height, index, xPad, yPad);
     default:
       throw new Error(`invalid position: ${pos}`);
   }

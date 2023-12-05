@@ -8,6 +8,7 @@ import { bgLoadTextures } from "./canvas";
 bgLoadTextures();
 
 const hooks = {};
+
 let gameContext;
 
 hooks.GameCanvas = {

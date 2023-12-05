@@ -1,5 +1,5 @@
 import { 
-  CENTER_X, loadTextures, cardPath, handCardCoord, makeRenderer, makeStage, makePlayable, makeUnplayable,
+  CENTER_X, loadTextures, cardPath, handCardCoord, makeRenderer, makeContainer, makePlayable, makeUnplayable,
   makeDeckSprite, makeTableSprite, makeHandSprites, makeHeldSprite,  makePlayerText,
   PLAYER_TURN_COLOR, NOT_PLAYER_TURN_COLOR, makeRoundText, makeTurnText, makeOverText,
 } from "./canvas";
@@ -35,8 +35,8 @@ export class GameContext {
     this.parentEl = parentEl;
     this.pushEvent = pushEvent;
 
-    this.stage = makeStage();
-    this.renderer = makeRenderer();
+    this.stage = makeContainer();
+    this.renderer = makeRenderer(this.parentEl.clientWidth, this.parentEl.clientHeight);
     this.sprites = initSprites();
 
     loadTextures().then(textures => {
@@ -48,6 +48,8 @@ export class GameContext {
 
       this.addSprites();
       requestAnimationFrame(time => this.draw(time));
+
+      window.addEventListener("resize", () => this.resize());
     });
   }
 
@@ -78,10 +80,20 @@ export class GameContext {
     } else {
       this.game.players.forEach(p => this.addPlayerText(p));
     }
+
+    if (this.game.state === "game_over" || this.game.state === "round_over") {
+      const winnerName = this.findWinner().username;
+      this.addOverText(winnerName);
+    }
   }
 
   addDeck() {
-    const sprite = makeDeckSprite(this.textures, this.game.state);
+    const sprite = makeDeckSprite(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      this.textures, 
+      this.game.state
+    );
     
     this.sprites.deck = sprite;
     this.stage.addChild(sprite);
@@ -110,14 +122,26 @@ export class GameContext {
   }
 
   addTableCard(card) {
-    const sprite = makeTableSprite(this.textures, card);
+    const sprite = makeTableSprite(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      this.textures,
+      card
+    );
     
     this.sprites.table.unshift(sprite);
     this.stage.addChild(sprite);
   }
 
   addHand(player) {
-    const sprites = makeHandSprites(this.textures, player.hand, player.position);
+    const sprites = makeHandSprites(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      this.textures, 
+      player.hand, 
+      player.position
+    );
+
     const belongsToUser = player.id === this.game.playerId;
 
     sprites.forEach((sprite, i) => {
@@ -132,7 +156,15 @@ export class GameContext {
 
   addHeldCard(player) {
     const belongsToUser = player.id === this.game.playerId;
-    const sprite = makeHeldSprite(this.textures, player.heldCard, player.position, belongsToUser);
+
+    const sprite = makeHeldSprite(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      this.textures, 
+      player.heldCard, 
+      player.position, 
+      belongsToUser
+    );
     
     this.sprites.held = sprite;
     this.stage.addChild(sprite);
@@ -143,7 +175,11 @@ export class GameContext {
   }
 
   addPlayerText(player) {
-    const text = makePlayerText(player);
+    const text = makePlayerText(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      player
+    );
     
     this.stage.addChild(text);
     this.sprites.players[player.position] = text;
@@ -181,7 +217,11 @@ export class GameContext {
   }
 
   addOverText(winnerName) {
-    const sprite = makeOverText(winnerName);
+    const sprite = makeOverText(
+      this.parentEl.clientWidth, 
+      this.parentEl.clientHeight, 
+      winnerName
+    );
 
     sprite.eventMode = "static";
     sprite.cursor = "hover"
@@ -206,6 +246,9 @@ export class GameContext {
 
     const players = rotate(game.players, firstPlayerIndex);
 
+    const clientWidth = this.parentEl.clientWidth;
+    const clientHeight = this.parentEl.clientHeight;
+
     for (let i = players.length-1; i >= 0; i--) {
       const player = players[i];
       this.addHand(player);
@@ -213,7 +256,7 @@ export class GameContext {
       const playerSprite = this.sprites.players[player.position];
       playerSprite.style.fill = PLAYER_TURN_COLOR;
 
-      const tween = handTweens(player.position, this.sprites.hands[player.position]);
+      const tween = handTweens(clientWidth, clientHeight, this.sprites.hands[player.position]);
       hands.push(tween);
     };
 
@@ -229,12 +272,12 @@ export class GameContext {
         // start tweening the deck after dealing the first row to the last player
         if (i === game.players.length-1 && j === 2) {
           tween.onComplete(() => {
-            tweenDeck(this.sprites.deck)
+            tweenDeck(clientWidth, clientHeight, this.sprites.deck)
               .start()
               .onComplete(() => {
                 this.addTableCards();
 
-                tweenTable(this.sprites.table[0])
+                tweenTable(clientWidth, clientHeight, this.sprites.table[0])
                   .start();
               });
           });
@@ -273,9 +316,15 @@ export class GameContext {
       origin: {y: 0.6},
     });
 
-    const players = sortByScore(this.game.players);
-    const winnerName = players[0].username;
+    // const players = sortByScore(this.game.players);
+    // const winnerName = players[0].username;
+    const winnerName = this.findWinner().username;
     this.addOverText(winnerName);
+  }
+
+  findWinner() {
+    const players = sortByScore(this.game.players);
+    return players[0];
   }
 
   onGameOver() {
@@ -352,7 +401,13 @@ export class GameContext {
     handSprite.texture = this.textures[cardPath(cardName)];
 
     // wiggle the sprite
-    const coord = handCardCoord(player.position, event.hand_index);
+    const coord = handCardCoord(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      player.position,
+      event.hand_index
+    );
+
     tweenWiggle(handSprite, coord.x)
       .start();
 
@@ -425,11 +480,6 @@ export class GameContext {
     this.addTableCard(game.tableCards[0]);
 
     tweenDiscard(player.position, this.sprites.table[0], this.sprites.held)
-      // .onComplete(() => {
-      //   if (this.isPlayable(game, "table")) {
-      //     makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
-      //   }
-      // })
       .start();
 
     this.sprites.held = null;
@@ -476,14 +526,15 @@ export class GameContext {
 
     const handSprites = this.sprites.hands[player.position];
     const handSprite = handSprites[index];
-    handSprite.texture = this.textures[cardPath(card)];
+    const path = cardPath(card);
+    handSprite.texture = this.textures[path];
 
-    tweenSwapTable(player.position, this.sprites.table[0], handSprite)
-      // .onComplete(() => {
-      //   if (this.isPlayable(game, "table")) {
-      //     makePlayable(this.sprites.table[0], () => this.onTableClick(game.playerId));
-      //   }
-      // })
+    tweenSwapTable(
+      this.parentEl.clientWidth,
+      this.parentEl.clientHeight,
+      this.sprites.table[0],
+      handSprite
+    )
       .start();
 
     // remove held card
@@ -503,7 +554,8 @@ export class GameContext {
     if (game.isFlipped) {
       handSprites.forEach((sprite, i) => {
         const card = player.hand[i].name;
-        sprite.texture = this.textures[cardPath(card)];
+        const path = cardPath(card);
+        sprite.texture = this.textures[path];
       });
     }
 
@@ -553,5 +605,11 @@ export class GameContext {
     }
 
     this.sprites = initSprites();
+  }
+
+  resize() {
+    this.renderer.resize(this.parentEl.clientWidth, this.parentEl.clientHeight);
+    this.removeSprites();
+    this.addSprites();
   }
 }
