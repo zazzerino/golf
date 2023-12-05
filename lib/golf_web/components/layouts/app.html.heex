@@ -28,8 +28,8 @@
 <nav class="">
   <ul class="z-10 border-b flex items-center gap-4 px-1 md:px-2 lg:px-4 justify-end bg-slate-50">
 -->
-<nav class="">
-  <ul class="w-full flex border-b bg-slate-50 items-center justify-between gap-4 px-2 sm:px-4 text-sm">
+<nav class="w-full h-[1.5rem]">
+  <ul class="flex border-b bg-slate-100 items-center justify-between gap-4 px-2 sm:px-4 text-sm">
     <%= if @current_user do %>
       <li class="mr-auto text-[0.8125rem] leading-6 text-zinc-900">
         Logged in as:
@@ -95,7 +95,7 @@
 <!--
 <main class="px-4 py-4 sm:px-6 lg:px-8">
 -->
-<main class="px-1 py-0">
+<main class="px-0 py-0">
   <div class="mx-auto w-full">
     <.flash_group flash={@flash} />
     <%= @inner_content %>

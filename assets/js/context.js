@@ -322,11 +322,6 @@ export class GameContext {
     this.addOverText(winnerName);
   }
 
-  findWinner() {
-    const players = sortByScore(this.game.players);
-    return players[0];
-  }
-
   onGameOver() {
     playCute();
 
@@ -597,6 +592,11 @@ export class GameContext {
 
   isPlayable(game, place) {
     return game.playableCards.includes(place);
+  }
+
+  findWinner() {
+    const players = sortByScore(this.game.players);
+    return players[0];
   }
 
   removeSprites() {

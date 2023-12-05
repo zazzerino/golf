@@ -189,4 +189,34 @@ defmodule GolfWeb.Components do
     <li><span class="font-semibold"><%= @name %></span>: <%= @score %></li>
     """
   end
+
+  @doc """
+  Renders a button.
+
+  ## Examples
+
+      <.button>Send!</.button>
+      <.button phx-click="go" class="ml-2">Send!</.button>
+  """
+  attr :type, :string, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(disabled form name value)
+
+  slot :inner_block, required: true
+
+  def game_button(assigns) do
+    ~H"""
+    <button
+      type={@type}
+      class={[
+        "phx-submit-loading:opacity-75 rounded-lg bg-blue-500 hover:bg-blue-600 py-4 px-6",
+        "text-2xl font-bold leading-6 text-white active:text-white/80 drop-shadow-lg border-solid",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
 end
