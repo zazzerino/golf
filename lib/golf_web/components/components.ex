@@ -55,7 +55,7 @@ defmodule GolfWeb.Components do
     ~H"""
     <div class={@class}>
       <.chat_messages messages={@messages} />
-      <.chat_form submit={@submit} />
+      <.chat_form class="mt-auto" submit={@submit} />
     </div>
     """
   end
@@ -63,7 +63,7 @@ defmodule GolfWeb.Components do
   def chat_messages(assigns) do
     ~H"""
     <div>
-      <h4 class="font-semibold text-md mb-1">Messages</h4>
+      <h4 class="font-semibold text-md mb-1 text-center">Messages</h4>
       <ul
         id="chat-messages"
         phx-update="stream"
@@ -75,7 +75,7 @@ defmodule GolfWeb.Components do
     """
   end
 
-        # class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
+  # class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
   defp chat_message(assigns) do
     ~H"""
     <li id={@id} class="text-left">
@@ -88,7 +88,7 @@ defmodule GolfWeb.Components do
 
   def chat_form(assigns) do
     ~H"""
-    <form phx-submit={@submit} class="space-y-1">
+    <form phx-submit={@submit} class={["space-y-1", @class]}>
       <.input
         id="chat-form-input"
         name="content"
@@ -191,7 +191,10 @@ defmodule GolfWeb.Components do
 
   def player_stats(assigns) do
     ~H"""
-    <li><span class="font-semibold text-purple-500"><%= @name %></span>: <span class="text-green-600"><%= @score %></span></li>
+    <li>
+      <span class="font-semibold text-purple-500"><%= @name %></span>:
+      <span class="text-green-600"><%= @score %></span>
+    </li>
     """
   end
 

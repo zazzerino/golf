@@ -8,7 +8,6 @@ import { bgLoadTextures } from "./canvas";
 bgLoadTextures();
 
 const hooks = {};
-
 let gameContext;
 
 hooks.GameCanvas = {
@@ -41,7 +40,12 @@ hooks.GameCanvas = {
     this.handleEvent("game-over", _ => {
       // console.log("game over");
       gameContext.onGameOver();
-    })
+    });
+
+    this.handleEvent("resize-canvas", _ => {
+      console.log("resizing");
+      gameContext.resize();
+    });
   }
 }
 
@@ -75,3 +79,19 @@ window.addEventListener("phx:clear-chat-input", _ => {
   const inputEl = document.querySelector("#chat-form-input");
   inputEl.value = "";
 });
+
+// const infoToggleEl = document.querySelector("#info-toggle");
+
+// if (infoToggleEl) {
+//   infoToggleEl.addEventListener("click", _ => {
+//     console.log("before", gameContext.parentEl);
+//     const infoEl = document.querySelector("#game-info");
+
+//     infoEl.style.display = infoEl.style.display === "none"
+//       ? "block"
+//       : "none";
+
+//     gameContext.resize();
+//     console.log("after", gameContext.parentEl);
+//   });
+// }

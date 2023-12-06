@@ -45,21 +45,16 @@ defmodule GolfWeb.GameLive do
   # end
 
   # min-w-[470px] min-h-[585px]
-        # <div class="absolute left-1/2 translate-x-[-50%] top-[90%] translate-y-[-100%]">
 
-      # <div id="game-wrapper" class="flex-1 basis-1/2 min-w-[470px] min-h-[585px]">
-# class="absolute top-[92%] left-1/2 translate-x-[-50%] translate-y-[-100%]"
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="w-full h-full flex flex-row">
-      <div class="relative grow h-[calc(100vh-1.5rem)] min-w-[470px] min-h-[585px]">
+    <div class="w-full h-full flex flex-row ">
+      <div class="relative min-w-0 flex-auto h-[calc(100vh-1.5rem)]">
         <div class="w-full h-full" id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
 
         <div class="absolute top-[90%] left-1/2 translate-x-[-50%] translate-y-[-50%]">
-          <.game_button :if={@can_start_game?}
-                        phx-click="start-game"
-          >
+          <.game_button :if={@can_start_game?} phx-click="start-game">
             Start Game
           </.game_button>
 
@@ -69,26 +64,47 @@ defmodule GolfWeb.GameLive do
         </div>
       </div>
 
-      <div :if={@game} class="mb-2 max-h-[calc(100vh-1.5rem)] flex-none flex flex-col w-1/3 px-4 space-y-4 divide-y">
-        <.game_stats class="max-h-[42vh] overflow-y-auto flex-1 " stats={Games.game_stats(@game)} />
-        <.chat class="mt-auto bg-white flex-1 flex flex-col" messages={@streams.chat_messages} submit="submit-chat" />
+      <div
+        :if={@game && @show_info?}
+        id="game-info"
+        class={[
+          "mb-2 min-w-[300px] max-h-[calc(100vh-1.5rem)] flex flex-col",
+          "px-4 space-y-4 divide-y whitespace-nowrap"
+        ]}
+      >
+        <.game_stats class="max-h-[42vh] overflow-y-auto" stats={Games.game_stats(@game)} />
+        <.chat
+          class="mt-auto bg-white flex flex-col"
+          messages={@streams.chat_messages}
+          submit="submit-chat"
+        />
       </div>
+
+      <.info_switch show_info?={@show_info?} />
     </div>
     """
   end
 
-        # <.game_stats class="max-h-[50vh] overflow-y-auto" stats={Games.game_stats(@game)} />
-        # <.chat class="max-h-[50vh] mb-1 bg-white rounded-lg flex flex-col" messages={@streams.chat_messages} submit="submit-chat" />
-
-      # class="absolute top-[80%] left-1/2 translate-x-[-50%] translate-y-[-50%]"
-
-      # <div :if={@game} class="h-[100vh] w-[25vw] ml-auto">
-
-      # <div :if={@game_over?} class="font-semibold text-center text-xl">Game Over</div>
-      # <div :if={@game} class="flex flex-col">
-      #   <.game_stats stats={Games.game_stats(@game)} />
-      #   <.chat messages={@streams.chat_messages} submit="submit-chat" />
-      # </div>
+  def info_switch(assigns) do
+    ~H"""
+    <label
+      id="info-switch"
+      class="top-[95%] left-[98%] translate-x-[-100%] absolute inline-flex items-center cursor-pointer"
+    >
+      <input
+        checked={not @show_info?}
+        phx-click="toggle-info"
+        id="info-toggle"
+        type="checkbox"
+        value=""
+        class="sr-only peer"
+      />
+      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+      </div>
+      <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Hide</span>
+    </label>
+    """
+  end
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -106,7 +122,8 @@ defmodule GolfWeb.GameLive do
        can_start_round?: nil,
        round_over?: nil,
        game_over?: nil,
-       name_colors: %{}
+       name_colors: %{},
+       show_info?: true
      )
      |> stream(:chat_messages, [])}
   end
@@ -235,6 +252,14 @@ defmodule GolfWeb.GameLive do
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
     {:noreply, push_event(socket, "clear-chat-input", %{})}
+  end
+
+  @impl true
+  def handle_event("toggle-info", _params, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_info?, not socket.assigns.show_info?)
+     |> push_event("resize-canvas", %{})}
   end
 
   defp action_at(state, "hand") when state in [:flip_2, :flip], do: :flip
