@@ -7,45 +7,6 @@ defmodule GolfWeb.GameLive do
   alias Golf.Games.{Player, Event}
   alias Golf.Games.ClientData, as: Data
 
-  # @impl true
-  # def render(assigns) do
-  #   ~H"""
-  #   <div class="mx-auto w-[480px] sm:w-[600px]">
-  #     <h1 class="text-zinc-800 text-center">
-  #       <div>
-  #         <span class="text-lg font-bold">Game</span>
-  #         <span class="text-green-500 font-semibold copyable hover:cursor-pointer hover:underline">
-  #           <%= @id %>
-  #         </span>
-  #       </div>
-  #     </h1>
-
-  #     <div class="origin-top-left scale-x-[80%] scale-y-[80%] sm:scale-x-100 sm:scale-y-100">
-  #       <div id="game-canvas" phx-hook="GameCanvas" phx-update="ignore"></div>
-  #     </div>
-
-  #     <div class="mt-[-7rem] sm:mt-1">
-  #       <.button :if={@can_start_game?} phx-click="start-game">
-  #         Start Game
-  #       </.button>
-
-  #       <.button :if={@can_start_round?} phx-click="start-round">
-  #         Start Round
-  #       </.button>
-  #     </div>
-
-  #     <div :if={@game_over?} class="font-semibold text-center text-xl">Game Over</div>
-
-  #     <div :if={@game} class="flex flex-col">
-  #       <.game_stats stats={Games.game_stats(@game)} />
-  #       <.chat messages={@streams.chat_messages} submit="submit-chat" />
-  #     </div>
-  #   </div>
-  #   """
-  # end
-
-  # min-w-[470px] min-h-[585px]
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -124,6 +85,7 @@ defmodule GolfWeb.GameLive do
        game_over?: nil,
        name_colors: %{},
        show_info?: true
+       #  chat_messages: []
      )
      |> stream(:chat_messages, [])}
   end
@@ -161,11 +123,13 @@ defmodule GolfWeb.GameLive do
     messages = Golf.Chat.get_messages(id)
     :ok = Golf.subscribe("chat:#{id}")
     {:noreply, stream(socket, :chat_messages, messages, at: 0)}
+    # {:noreply, assign(socket, :chat_messages, messages)}
   end
 
   @impl true
   def handle_info({:new_chat_message, message}, socket) do
     {:noreply, stream_insert(socket, :chat_messages, message, at: 0)}
+    # {:noreply, assign(socket, :chat_messages, [message | socket.assigns.chat_messages])}
   end
 
   @impl true
@@ -256,10 +220,20 @@ defmodule GolfWeb.GameLive do
 
   @impl true
   def handle_event("toggle-info", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:show_info?, not socket.assigns.show_info?)
-     |> push_event("resize-canvas", %{})}
+    unless socket.assigns.show_info? do
+      messages = Golf.Chat.get_messages(socket.assigns.id)
+
+      {:noreply,
+       socket
+       |> assign(show_info?: not socket.assigns.show_info?)
+       |> stream(:chat_messages, messages, at: 0)
+       |> push_event("resize-canvas", %{})}
+    else
+      {:noreply,
+       socket
+       |> assign(show_info?: not socket.assigns.show_info?)
+       |> push_event("resize-canvas", %{})}
+    end
   end
 
   defp action_at(state, "hand") when state in [:flip_2, :flip], do: :flip

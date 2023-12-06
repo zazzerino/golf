@@ -9,7 +9,7 @@ defmodule GolfWeb.HomeLive do
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-sm space-y-6 text-center">
-      <.header class="text-center">Home</.header>
+      <.header class="text-center">Golf <span class="text-violet-400">**BETA**</span></.header>
 
       <p :if={!@current_user} class="text-center">
         <.register_link /> or <.login_link /> to play.

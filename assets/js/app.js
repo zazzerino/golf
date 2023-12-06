@@ -43,7 +43,6 @@ hooks.GameCanvas = {
     });
 
     this.handleEvent("resize-canvas", _ => {
-      console.log("resizing");
       gameContext.resize();
     });
   }

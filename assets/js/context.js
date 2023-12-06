@@ -609,6 +609,7 @@ export class GameContext {
 
   resize() {
     this.renderer.resize(this.parentEl.clientWidth, this.parentEl.clientHeight);
+    // TODO
     this.removeSprites();
     this.addSprites();
   }

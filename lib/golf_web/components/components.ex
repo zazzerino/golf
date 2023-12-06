@@ -75,6 +75,8 @@ defmodule GolfWeb.Components do
     """
   end
 
+  # <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
+
   # class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
   defp chat_message(assigns) do
     ~H"""
