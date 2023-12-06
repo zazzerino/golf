@@ -100,25 +100,6 @@ defmodule GolfWeb.Components do
     """
   end
 
-  def player_scores(assigns) do
-    ~H"""
-    <table class="">
-      <thead class="text-sm text-left">
-        <tr>
-          <th>User</th>
-          <th>Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr :for={p <- @players}>
-          <td><%= p.user.name %></td>
-          <td><%= p.score %></td>
-        </tr>
-      </tbody>
-    </table>
-    """
-  end
-
   def game_stats(assigns) do
     ~H"""
     <div class={["flex flex-col my-1", @class]}>
@@ -145,7 +126,9 @@ defmodule GolfWeb.Components do
     <table class="min-w-[50%] mx-auto table-fixed border-separate border rounded bg-slate-50">
       <thead class="text-sm text-center">
         <tr>
-          <th :for={{username, _, _} <- @totals} class="text-purple-500"><%= username %></th>
+          <th :for={{username, color, _} <- @totals} class={"text-#{color}-500"}>
+            <%= username %>
+          </th>
         </tr>
       </thead>
       <tbody class="text-center text-sm">
@@ -183,7 +166,7 @@ defmodule GolfWeb.Components do
   def players_stats(assigns) do
     ~H"""
     <ol>
-      <.player_stats :for={p <- @players} name={p.user.name} score={p.score} />
+      <.player_stats :for={p <- @players} name={p.user.name} score={p.score} color={p.color} />
     </ol>
     """
   end
@@ -191,7 +174,7 @@ defmodule GolfWeb.Components do
   def player_stats(assigns) do
     ~H"""
     <li>
-      <span class="font-semibold text-purple-500"><%= @name %></span>:
+      <span class={"font-semibold text-#{@color}-500"}><%= @name %></span>:
       <span class="text-green-600"><%= @score %></span>
     </li>
     """
