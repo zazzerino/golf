@@ -79,7 +79,7 @@ defmodule GolfWeb.Components do
     ~H"""
     <li id={@id} class="text-left">
       <span class="text-xs text-green-600"><%= @msg.inserted_at %></span>
-      <span class="font-semibold text-purple-500"><%= @msg.user.name %></span>:
+      <span class={"font-semibold text-#{@msg.color || "red"}-500"}><%= @msg.user.name %></span>:
       <span class="text-lg"><%= @msg.content %></span>
     </li>
     """

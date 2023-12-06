@@ -471,20 +471,18 @@ defmodule Golf.Games do
     |> Enum.map(fn {_, index} -> String.to_existing_atom("hand_#{index}") end)
   end
 
-  @name_colors ~w(blue purple green fuchsia)
-
-  def game_stats(game) do
+  def game_stats(game, colors) do
     game
     |> Map.put(:state, current_state(game))
     |> Map.update!(:rounds, fn rounds ->
         round_nums = length(game.rounds)..1
-        Enum.zip_with(rounds, round_nums, &round_stats(&1, &2, game.players))
+        Enum.zip_with(rounds, round_nums, &round_stats(&1, &2, game.players, colors))
       end
     )
-    |> Map.put(:totals, total_scores(game))
+    |> Map.put(:totals, total_scores(game, colors))
   end
 
-  def total_scores(game, colors \\ @name_colors) do
+  def total_scores(game, colors) do
     game.players
     |> Enum.zip_with(colors, fn p, c -> Map.put(p, :color, c) end)
     |> Enum.map(fn p -> {p.user.name, p.color, total_scores_player(game, p.id)} end)
@@ -517,7 +515,7 @@ defmodule Golf.Games do
     end
   end
 
-  defp round_stats(round, round_num, players, colors \\ @name_colors) do
+  defp round_stats(round, round_num, players, colors) do
     out_index = Enum.find_index(players, & &1.id == round.player_out_id)
 
     player_out = if out_index do

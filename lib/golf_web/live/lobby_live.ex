@@ -86,7 +86,10 @@ defmodule GolfWeb.LobbyLive do
 
   @impl true
   def handle_info({:load_chat_messages, id}, socket) do
-    messages = Golf.Chat.get_messages(id)
+    messages =
+      Golf.Chat.get_messages(id)
+      |> Enum.map(fn msg -> Map.put(msg, :color, "blue") end)
+
     :ok = Golf.subscribe("chat:#{id}")
     {:noreply, stream(socket, :chat_messages, messages, at: 0)}
   end
@@ -150,7 +153,10 @@ defmodule GolfWeb.LobbyLive do
       Chat.Message.new(id, socket.assigns.current_user, content)
       |> Chat.insert_message()
 
-    message = Map.update!(message, :inserted_at, &Chat.format_chat_time/1)
+    message =
+      message
+      |> Map.update!(:inserted_at, &Chat.format_chat_time/1)
+      |> Map.put(:color, "blue")
 
     :ok = Golf.broadcast("chat:#{id}", {:new_chat_message, message})
     {:noreply, push_event(socket, "clear-chat-input", %{})}
