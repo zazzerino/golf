@@ -62,12 +62,12 @@ defmodule GolfWeb.Components do
 
   def chat_messages(assigns) do
     ~H"""
-    <div>
+    <div class="h-full">
       <h4 class="font-semibold text-md mb-1 text-center">Messages</h4>
       <ul
         id="chat-messages"
         phx-update="stream"
-        class="overflow-y-auto bg-slate-100 rounded-lg max-h-[33vh]"
+        class="overflow-y-auto h-full max-h-[50vh] bg-slate-50 rounded-lg]"
       >
         <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
       </ul>
@@ -75,15 +75,12 @@ defmodule GolfWeb.Components do
     """
   end
 
-  # <.chat_message :for={{id, msg} <- @messages} id={id} msg={msg} />
-
-  # class="overflow-y-auto min-h-[80px] max-h-[250px] bg-slate-100 rounded-lg"
   defp chat_message(assigns) do
     ~H"""
     <li id={@id} class="text-left">
       <span class="text-xs text-green-600"><%= @msg.inserted_at %></span>
       <span class="font-semibold text-purple-500"><%= @msg.user.name %></span>:
-      <span class="text-sm"><%= @msg.content %></span>
+      <span class="text-lg"><%= @msg.content %></span>
     </li>
     """
   end
@@ -145,15 +142,15 @@ defmodule GolfWeb.Components do
 
   def total_scores_table(assigns) do
     ~H"""
-    <table class="min-w-[50%] mx-auto table-fixed border-separate border rounded">
+    <table class="min-w-[50%] mx-auto table-fixed border-separate border rounded bg-slate-50">
       <thead class="text-sm text-center">
         <tr>
-          <th :for={{username, _, _} <- @totals}><%= username %></th>
+          <th :for={{username, _, _} <- @totals} class="text-purple-500"><%= username %></th>
         </tr>
       </thead>
       <tbody class="text-center text-sm">
         <tr>
-          <td :for={{_, _, score} <- @totals}><%= score %></td>
+          <td :for={{_, _, score} <- @totals} class="text-lg"><%= score %></td>
         </tr>
       </tbody>
     </table>
@@ -162,7 +159,7 @@ defmodule GolfWeb.Components do
 
   def round_stats_table(assigns) do
     ~H"""
-    <table class="table-auto border-separate border-spacing-1 border border-slate-200 px-2 rounded">
+    <table class="table-auto border-separate border-spacing-1 border border-slate-200 px-2 rounded bg-slate-50">
       <thead class="text-xs text-left">
         <tr>
           <th>Round</th>
@@ -228,6 +225,28 @@ defmodule GolfWeb.Components do
     >
       <%= render_slot(@inner_block) %>
     </button>
+    """
+  end
+
+  # adapted from https://flowbite.com/docs/forms/toggle/
+  def info_switch(assigns) do
+    ~H"""
+    <label
+      id="info-switch"
+      class="top-[95%] left-[98%] translate-x-[-100%] absolute inline-flex items-center cursor-pointer"
+    >
+      <input
+        checked={not @show_info?}
+        phx-click="toggle-info"
+        id="info-toggle"
+        type="checkbox"
+        value=""
+        class="sr-only peer"
+      />
+      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+      </div>
+      <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Hide</span>
+    </label>
     """
   end
 end

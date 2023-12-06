@@ -169,9 +169,14 @@ export class GameContext {
     this.sprites.held = sprite;
     this.stage.addChild(sprite);
 
-    if (this.sprites.table[0] && this.isPlayable(this.game, "held")) {
-      makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
+    if (this.isPlayable(this.game, "held")) {
+      if (this.sprites.table[0]) {
+        makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
+      } else {
+        // makePlayable(this.sprites.held, () => this.onHeldClick(player.id));
+      }
     }
+
   }
 
   addPlayerText(player) {
@@ -316,8 +321,6 @@ export class GameContext {
       origin: {y: 0.6},
     });
 
-    // const players = sortByScore(this.game.players);
-    // const winnerName = players[0].username;
     const winnerName = this.findWinner().username;
     this.addOverText(winnerName);
   }
@@ -459,6 +462,8 @@ export class GameContext {
 
       if (this.sprites.table[0]) {
         makePlayable(this.sprites.table[0], () => this.onTableClick(player.id));
+      } else {
+        // makePlayable(this.sprites.held, () => this.onHeldClick(player.id));
       }
 
       const handSprites = this.sprites.hands[player.position];

@@ -21,7 +21,6 @@ defmodule GolfWeb.UserLoginLive do
 
         <:actions>
           <.input field={@form[:remember_me]} type="checkbox" label="Keep me logged in" />
-
         </:actions>
         <:actions>
           <.button phx-disable-with="Signing in..." class="w-full">
@@ -33,9 +32,9 @@ defmodule GolfWeb.UserLoginLive do
     """
   end
 
-          # <.link href={~p"/users/reset_password"} class="text-sm font-semibold">
-          #   Forgot your password?
-          # </.link>
+  # <.link href={~p"/users/reset_password"} class="text-sm font-semibold">
+  #   Forgot your password?
+  # </.link>
 
   def mount(_params, _session, socket) do
     email = live_flash(socket.assigns.flash, :email)

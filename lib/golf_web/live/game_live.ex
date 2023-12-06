@@ -1,7 +1,7 @@
 defmodule GolfWeb.GameLive do
   use GolfWeb, :live_view
 
-  import GolfWeb.Components, only: [chat: 1, game_stats: 1, game_button: 1]
+  import GolfWeb.Components, only: [chat: 1, game_stats: 1, game_button: 1, info_switch: 1]
 
   alias Golf.{Games, GamesDb, Chat}
   alias Golf.Games.{Player, Event}
@@ -29,11 +29,17 @@ defmodule GolfWeb.GameLive do
         :if={@game && @show_info?}
         id="game-info"
         class={[
-          "mb-2 min-w-[300px] max-h-[calc(100vh-1.5rem)] flex flex-col",
-          "px-4 space-y-4 divide-y whitespace-nowrap"
+          "min-w-[40vw] max-h-[calc(100vh-2.5rem)] flex flex-col",
+          "px-4 space-y-4 divide-y whitespace-nowrap mb-1"
         ]}
       >
-        <.game_stats class="max-h-[42vh] overflow-y-auto" stats={Games.game_stats(@game)} />
+        <div :if={@game_over?} class="text-center font-semibold text-lg mt-1 mb-[-0.5rem]">
+          Game Over
+        </div>
+        <.game_stats
+          class="max-h-[calc(50vh-1.5rem)] overflow-y-auto"
+          stats={Games.game_stats(@game)}
+        />
         <.chat
           class="mt-auto bg-white flex flex-col"
           messages={@streams.chat_messages}
@@ -43,27 +49,6 @@ defmodule GolfWeb.GameLive do
 
       <.info_switch show_info?={@show_info?} />
     </div>
-    """
-  end
-
-  def info_switch(assigns) do
-    ~H"""
-    <label
-      id="info-switch"
-      class="top-[95%] left-[98%] translate-x-[-100%] absolute inline-flex items-center cursor-pointer"
-    >
-      <input
-        checked={not @show_info?}
-        phx-click="toggle-info"
-        id="info-toggle"
-        type="checkbox"
-        value=""
-        class="sr-only peer"
-      />
-      <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
-      </div>
-      <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Hide</span>
-    </label>
     """
   end
 
